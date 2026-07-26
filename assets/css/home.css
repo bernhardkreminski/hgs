@@ -327,10 +327,11 @@
 .group-frame-compact img {
   width: 100%;
   height: auto;
-  aspect-ratio: 21 / 9;
+  aspect-ratio: 2 / 1;
   object-fit: cover;
-  object-position: 50% 38%;
+  /* Quadratische Vorlage: Band auf die Gesichter der Gruppe zentrieren */
+  object-position: 50% 56%;
 }
 @media (max-width: 640px) {
-  .group-frame-compact img { aspect-ratio: 16 / 9; }
+  .group-frame-compact img { aspect-ratio: 4 / 3; }
 }
