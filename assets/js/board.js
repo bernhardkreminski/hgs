@@ -182,6 +182,7 @@
       sort: sortMovies,
       listMode: true,
       watchable: true,
+      splitWatched: true,
       renderBody: renderMovieBody,
       renderMeta: renderMovieMeta,
     },
@@ -705,6 +706,34 @@
       grid.appendChild(emptyCard);
       return;
     }
+
+    /* Filme: zwei getrennte Listen — offene Watchlist und schon Gesehenes */
+    if (config.splitWatched) {
+      const open = config.sort(entries.filter((e) => !e.watched));
+      const seen = config.sort(entries.filter((e) => e.watched));
+
+      grid.appendChild(el("h2", { class: "list-group-title" }, "Watchlist"));
+      if (open.length === 0) {
+        const done = el("div", { class: "card empty-card" });
+        done.appendChild(el("p", { class: "muted" }, "Alles abgehakt — Zeit für Nachschub!"));
+        grid.appendChild(done);
+      } else {
+        open.forEach((entry) => grid.appendChild(createCard(entry)));
+      }
+
+      const seenTitle = el("h2", { class: "list-group-title watched-group-title" }, "Schon gesehen");
+      seenTitle.appendChild(el("span", { class: "list-group-count" }, String(seen.length)));
+      grid.appendChild(seenTitle);
+      if (seen.length === 0) {
+        const none = el("div", { class: "card empty-card" });
+        none.appendChild(el("p", { class: "muted" }, "Noch nichts abgehakt. Häkchen setzen, sobald ihr was geschaut habt."));
+        grid.appendChild(none);
+      } else {
+        seen.forEach((entry) => grid.appendChild(createCard(entry)));
+      }
+      return;
+    }
+
     config.sort(entries).forEach((entry) => grid.appendChild(createCard(entry)));
   }
 

@@ -221,6 +221,35 @@ select.input {
   .board-header { padding-top: calc(var(--nav-h) + 1.8rem); }
 }
 
+/* ---------- List group headings (Watchlist / Schon gesehen) ---------- */
+.list-group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0.4rem 0 0.2rem;
+}
+.list-group-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.watched-group-title { margin-top: 2.2rem; }
+.list-group-count {
+  order: 1;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.05rem 0.55rem;
+}
+
 /* ---------- Movie list rows (listMode + watchable) ---------- */
 .board-list {
   display: flex;

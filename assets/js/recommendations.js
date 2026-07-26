@@ -1,7 +1,8 @@
-/* HGS Filmempfehlungen — schlägt neue Filme vor, basierend auf der Filmliste.
- * Fragt für jeden eingetragenen Film TMDB nach ähnlichen/empfohlenen Filmen,
- * zählt Überschneidungen (ein Kandidat, der von mehreren gelisteten Filmen
- * empfohlen wird, rankt höher) und blendet Filme aus, die schon auf der Liste stehen.
+/* HGS Filmempfehlungen — schlägt neue Filme vor, basierend auf dem, was die WG
+ * schon GESEHEN hat (abgehakte Einträge). Fragt für jeden gesehenen Film TMDB
+ * nach ähnlichen/empfohlenen Filmen, zählt Überschneidungen (ein Kandidat, der
+ * von mehreren gesehenen Filmen empfohlen wird, rankt höher) und blendet alles
+ * aus, was schon auf der Liste steht (gesehen oder noch offen).
  * Braucht window.HGS_CONFIG.tmdb.apiKey — ohne Schlüssel bleibt der Block versteckt.
  */
 (function () {
@@ -58,7 +59,18 @@
   }
 
   function cacheKeyFor(titles) {
-    return "hgs:reco:" + titles.map(normalizeTitle).sort().join("|");
+    return "hgs:reco:seen:" + titles.map(normalizeTitle).sort().join("|");
+  }
+
+  /* Alte Caches (anderer Titel-Satz oder Vorgänger-Schema) aufräumen */
+  function pruneCaches(currentKey) {
+    try {
+      Object.keys(localStorage)
+        .filter((k) => k.indexOf("hgs:reco:") === 0 && k !== currentKey)
+        .forEach((k) => localStorage.removeItem(k));
+    } catch (_) {
+      /* egal */
+    }
   }
 
   function loadCache(key) {
@@ -81,12 +93,14 @@
     }
   }
 
-  async function buildRecommendations(watched) {
-    const watchedTitles = new Set(watched.map((e) => normalizeTitle(e.title)));
+  /* seeds = gesehene Filme (Grundlage der Empfehlungen)
+   * onList = ALLE Titel der Liste (auch die offene Watchlist) — die fliegen raus */
+  async function buildRecommendations(seeds, onList) {
+    const listTitles = new Set(onList.map((e) => normalizeTitle(e.title)));
     const candidates = new Map(); // tmdbId -> { movie, hits }
 
     const matches = await Promise.all(
-      watched.map(async (entry) => {
+      seeds.map(async (entry) => {
         try {
           return await findMovie(entry.title);
         } catch (_) {
@@ -106,7 +120,7 @@
         }
         recs.forEach((rec) => {
           if (matchedIds.has(rec.id)) return; // schon selbst auf der Liste
-          if (watchedTitles.has(normalizeTitle(rec.title))) return;
+          if (listTitles.has(normalizeTitle(rec.title))) return;
           const existing = candidates.get(rec.id);
           if (existing) existing.hits += 1;
           else candidates.set(rec.id, { movie: rec, hits: 1 });
@@ -155,25 +169,38 @@
     const grid = document.getElementById("reco-grid");
     if (!section || !grid) return;
 
-    let watched;
+    let all;
     try {
-      watched = await window.HGSStore.load("movies");
+      all = await window.HGSStore.load("movies");
     } catch (_) {
       return;
     }
-    if (!watched || watched.length === 0) return;
+    if (!all || all.length === 0) return;
 
+    const seeds = all.filter((e) => e.watched);
     section.hidden = false;
+
+    /* Noch nichts abgehakt → erklären statt stumm verschwinden */
+    if (seeds.length === 0) {
+      if (status) {
+        status.hidden = false;
+        status.textContent = "Hakt ein paar Filme als gesehen ab — daraus bauen wir eure Empfehlungen.";
+      }
+      grid.hidden = true;
+      return;
+    }
+
     if (status) {
       status.hidden = false;
       status.textContent = "Lade Empfehlungen…";
     }
 
-    const key = cacheKeyFor(watched.map((e) => e.title));
+    const key = cacheKeyFor(seeds.map((e) => e.title));
+    pruneCaches(key);
     let results = loadCache(key);
     if (!results) {
       try {
-        results = await buildRecommendations(watched);
+        results = await buildRecommendations(seeds, all);
         saveCache(key, results);
       } catch (_) {
         results = [];
