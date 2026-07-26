@@ -120,31 +120,33 @@
 }
 
 /* Cheb's quiet easter egg: a small note linking to the hidden album page. */
-.person-egg {
+.person-album-link {
   position: absolute;
-  top: 0.45rem;
-  right: 0.45rem;
+  top: 0.55rem;
+  right: 0.55rem;
   z-index: 3;
-  width: 1.6rem;
-  height: 1.6rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  font-size: 0.95rem;
-  color: rgba(242, 239, 233, 0.22);
-  background: transparent;
-  transition: color 0.25s ease, background 0.25s ease;
+  gap: 0.3rem;
+  font: 600 0.72rem var(--font-body);
+  letter-spacing: 0.05em;
+  color: var(--ink);
+  background: rgba(14, 12, 16, 0.62);
+  border: 1px solid rgba(255, 158, 77, 0.55);
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-.person-tile:hover .person-egg,
-.person-tile:focus-within .person-egg {
-  color: rgba(242, 239, 233, 0.55);
-}
-.person-egg:hover,
-.person-egg:focus {
-  color: var(--accent);
-  background: rgba(14, 12, 16, 0.45);
+.person-album-link:hover,
+.person-album-link:focus {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
   opacity: 1;
+  transform: translateY(-1px);
+  text-decoration: none;
 }
 
 /* 8th tile: accent filler completing the 4x2 wall — brand wordmark, not a photo. */
@@ -223,3 +225,10 @@
   .people-grid { gap: 0.6rem; }
   .person-fact { font-size: 0.76rem; }
 }
+
+/* Group photo: compact presentation */
+.group-frame-compact {
+  max-width: 720px;
+  margin-inline: auto;
+}
+.group-frame-compact img { aspect-ratio: 3 / 2; }
