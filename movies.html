@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Filmliste · HGS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/board.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌇</text></svg>">
+</head>
+<body>
+<nav class="site-nav">
+  <a class="nav-brand" href="index.html">HGS<span class="brand-dot">.</span></a>
+  <div class="nav-links">
+    <a href="index.html">Start</a>
+    <a href="about.html">Die WG</a>
+    <a href="movies.html" aria-current="page">Filme</a>
+    <a href="workshops.html">Workshops</a>
+  </div>
+</nav>
+
+<main>
+  <section class="section board-header">
+    <div class="container">
+      <h1 class="section-title">🎬 Filmliste</h1>
+      <p class="section-sub">Filme, die wir noch zusammen schauen müssen.</p>
+      <button type="button" id="add-entry-btn" class="btn btn-primary">+ Film eintragen</button>
+    </div>
+  </section>
+
+  <section class="section board-section">
+    <div class="container">
+      <p id="board-status" class="muted board-status" aria-live="polite">Lade…</p>
+      <div id="board-grid" class="grid" hidden></div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <p>HGS — unsere WG überm Dach der Stadt. Mit 🧡 selbst gebaut.</p>
+</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/store.js"></script>
+<script>window.HGS_BOARD = { kind: "movies" };</script>
+<script src="assets/js/board.js"></script>
+</body>
+</html>

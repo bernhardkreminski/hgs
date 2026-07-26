@@ -1,0 +1,91 @@
+/* HGS whiteboard engine styles (movies.html / workshops.html).
+ * Owned by Agent B. Loaded after base.css — only adds to it, never overrides tokens. */
+
+/* ---------- Header flourish ---------- */
+.board-header {
+  position: relative;
+  overflow: hidden;
+}
+.board-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 15% -10%, rgba(255, 180, 94, 0.16), transparent 55%);
+  pointer-events: none;
+}
+.board-header .container { position: relative; }
+.board-header .btn-primary { margin-top: 1.4rem; }
+
+.board-status { margin-bottom: 1rem; }
+
+/* ---------- Cards ---------- */
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+.card-head h3 { flex: 1; }
+
+.card-actions { display: flex; gap: 0.15rem; flex-shrink: 0; }
+.icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 0.35rem 0.45rem;
+  border-radius: 8px;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+.icon-btn:hover { opacity: 1; background: rgba(247, 239, 230, 0.08); }
+.icon-btn:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.date-meta {
+  display: block;
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+}
+.justwatch-link {
+  display: inline-block;
+  margin-top: 0.6rem;
+  font-weight: 600;
+}
+
+.tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+.tag.is-past { opacity: 0.55; }
+
+.empty-card { text-align: center; padding: 2.5rem 1.5rem; }
+.empty-card p { font-size: 1.02rem; margin: 0; }
+
+/* ---------- Form validation ---------- */
+.field-error {
+  color: var(--accent-2);
+  font-size: 0.82rem;
+  margin-top: -0.15rem;
+}
+.input.invalid { border-color: var(--accent-2); }
+
+/* ---------- Code-modal shake ---------- */
+@keyframes hgs-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.modal-card.shake { animation: hgs-shake 0.4s ease; }
+
+@media (max-width: 560px) {
+  .card-head { flex-wrap: wrap; }
+}
