@@ -57,6 +57,19 @@
   const githubBackend = {
     async load(kind) {
       const g = CFG.github;
+      /* Primär über die GitHub-API lesen: raw.githubusercontent.com liefert nach
+       * einem Schreibvorgang noch minutenlang veraltete Inhalte aus dem CDN aus
+       * (dann fehlen z. B. gerade eingetragene Filme). Die API antwortet frisch.
+       * Fällt bei Rate-Limit/Netzproblemen auf das CDN zurück. */
+      const api =
+        "https://api.github.com/repos/" + g.owner + "/" + g.repo + "/contents/" + kind + ".json?ref=" + g.branch + "&t=" + Date.now();
+      try {
+        const res = await fetch(api, { headers: { Accept: "application/vnd.github.raw" }, cache: "no-store" });
+        if (res.status === 404) return [];
+        if (res.ok) return JSON.parse(await res.text());
+      } catch (_) {
+        /* unten über das CDN versuchen */
+      }
       const url = "https://raw.githubusercontent.com/" + g.owner + "/" + g.repo + "/" + g.branch + "/" + kind + ".json?t=" + Date.now();
       const res = await fetch(url, { cache: "no-store" });
       if (res.status === 404) return [];

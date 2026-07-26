@@ -759,6 +759,29 @@
         await saveEntries(entries.concat(entry), config.toastAdd);
       });
     }
+
+    /* Offene Seite aktualisieren, wenn sie wieder in den Vordergrund kommt —
+     * sonst sieht man Einträge nicht, die jemand anderes zwischenzeitlich
+     * eingetragen oder abgehakt hat. Nicht stören, während gerade jemand
+     * tippt (Modal offen) oder ein Datum eingibt. */
+    let lastRefresh = Date.now();
+    async function refresh() {
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastRefresh < 10000) return;
+      if (document.querySelector(".modal-backdrop") || document.querySelector(".watch-date-row")) return;
+      lastRefresh = Date.now();
+      let fresh;
+      try {
+        fresh = await HGSStore.load(KIND);
+      } catch (_) {
+        return;
+      }
+      if (JSON.stringify(fresh) === JSON.stringify(entries)) return;
+      entries = fresh;
+      renderGrid();
+    }
+    document.addEventListener("visibilitychange", refresh);
+    window.addEventListener("focus", refresh);
   }
 
   if (document.readyState === "loading") {
