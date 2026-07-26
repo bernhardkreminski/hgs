@@ -59,6 +59,22 @@
   function sortByCreatedDesc(list) {
     return list.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   }
+  /* Filme: erst die Watchlist (neueste zuerst), dann die gesehenen (zuletzt gesehen zuerst) */
+  function sortMovies(list) {
+    const unwatched = list.filter((e) => !e.watched);
+    const watched = list.filter((e) => e.watched);
+    unwatched.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    watched.sort(
+      (a, b) =>
+        String(b.watchedAt || "").localeCompare(String(a.watchedAt || "")) ||
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+    return unwatched.concat(watched);
+  }
+  function localTodayISO() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
   function sortWorkshops(list) {
     const today = startOfDay(new Date());
     const upcoming = [];
@@ -163,7 +179,9 @@
           hint: "Optional, aber gern gesehen.",
         },
       ],
-      sort: sortByCreatedDesc,
+      sort: sortMovies,
+      listMode: true,
+      watchable: true,
       renderBody: renderMovieBody,
       renderMeta: renderMovieMeta,
     },
@@ -520,8 +538,121 @@
     }
   }
 
+  /* ---------- rendering: list rows (movies) ----------
+   * Checkbox = "gesehen". Beim Abhaken öffnet sich inline ein Datumsfeld
+   * ("Wann geschaut?"); erst Speichern schreibt (Code-Gate wie immer). */
+  function createRow(entry) {
+    const row = el("div", { class: "card entry-row" + (entry.watched ? " is-watched" : "") });
+
+    const checkLabel = el("label", { class: "watch-check" });
+    const checkbox = el("input", {
+      type: "checkbox",
+      "aria-label": entry.watched ? "Als noch nicht gesehen markieren" : "Als gesehen markieren",
+    });
+    checkbox.checked = !!entry.watched;
+    checkLabel.append(checkbox, el("span", { class: "watch-box", "aria-hidden": "true" }, "✓"));
+
+    const main = el("div", { class: "row-main" });
+    const titleLine = el("div", { class: "row-title-line" });
+    titleLine.appendChild(el("h3", {}, entry.title));
+
+    function openDateRow(initial, onSave) {
+      const existing = main.querySelector(".watch-date-row");
+      if (existing) existing.remove();
+      const wrap = el("div", { class: "watch-date-row" });
+      const dateInput = el("input", { class: "input watch-date-input", type: "date", "aria-label": "Wann geschaut?" });
+      dateInput.value = initial || localTodayISO();
+      const ok = el("button", { type: "button", class: "btn btn-primary btn-small" }, "Speichern");
+      const cancel = el("button", { type: "button", class: "btn btn-ghost btn-small" }, "Abbrechen");
+      wrap.append(el("span", { class: "watch-date-label" }, "Wann geschaut?"), dateInput, ok, cancel);
+      main.appendChild(wrap);
+      dateInput.focus();
+      cancel.addEventListener("click", () => {
+        wrap.remove();
+        checkbox.checked = !!entry.watched;
+        checkbox.disabled = false;
+      });
+      ok.addEventListener("click", () => onSave(dateInput.value || localTodayISO(), wrap));
+      return wrap;
+    }
+
+    if (entry.watched) {
+      const d = parseLocalDate(entry.watchedAt);
+      const tagText = d ? "Gesehen am " + d.toLocaleDateString("de-DE") : "Gesehen";
+      const watchedTag = el(
+        "button",
+        { type: "button", class: "tag alt watched-tag", "aria-label": tagText + " — Datum ändern" },
+        tagText + " ✎"
+      );
+      watchedTag.addEventListener("click", () => {
+        openDateRow(entry.watchedAt, async (val, wrap) => {
+          const next = entries.map((e) => (e.id === entry.id ? Object.assign({}, entry, { watchedAt: val }) : e));
+          const saved = await saveEntries(next, "Datum aktualisiert.");
+          if (!saved) wrap.remove();
+        });
+      });
+      titleLine.appendChild(watchedTag);
+    }
+    main.appendChild(titleLine);
+    if (entry.description) main.appendChild(el("p", { class: "row-desc" }, entry.description));
+
+    const metaRow = el("div", { class: "row-meta" });
+    if (entry.url && /^https?:\/\//i.test(entry.url)) {
+      metaRow.appendChild(
+        el("a", { href: entry.url, target: "_blank", rel: "noopener", class: "justwatch-link" }, "JustWatch ↗")
+      );
+    }
+    metaRow.appendChild(el("span", { class: "date-meta muted" }, "eingetragen am " + formatCreated(entry.createdAt)));
+    main.appendChild(metaRow);
+
+    const actions = el("div", { class: "card-actions" });
+    const editBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Bearbeiten" }, "✏️");
+    const deleteBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Löschen" }, "🗑");
+    actions.append(editBtn, deleteBtn);
+
+    row.append(checkLabel, main, actions);
+
+    checkbox.addEventListener("change", async () => {
+      if (checkbox.checked) {
+        checkbox.disabled = true;
+        openDateRow(null, async (val, wrap) => {
+          const updated = Object.assign({}, entry, { watched: true, watchedAt: val });
+          const next = entries.map((e) => (e.id === entry.id ? updated : e));
+          const saved = await saveEntries(next, "Als gesehen markiert 🎬");
+          if (!saved) {
+            wrap.remove();
+            checkbox.checked = false;
+            checkbox.disabled = false;
+          }
+        });
+      } else {
+        const updated = Object.assign({}, entry, { watched: false, watchedAt: "" });
+        const next = entries.map((e) => (e.id === entry.id ? updated : e));
+        const saved = await saveEntries(next, "Wieder auf der Watchlist.");
+        if (!saved) checkbox.checked = true;
+      }
+    });
+
+    editBtn.addEventListener("click", async () => {
+      const data = await openEntryModal("edit", entry);
+      if (!data) return;
+      const updated = Object.assign({}, entry, data);
+      const next = entries.map((e) => (e.id === entry.id ? updated : e));
+      await saveEntries(next, config.toastEdit);
+    });
+    deleteBtn.addEventListener("click", async () => {
+      const confirmed = await openConfirmModal(entry.title);
+      if (!confirmed) return;
+      const next = entries.filter((e) => e.id !== entry.id);
+      await saveEntries(next, config.toastDelete, { forceCode: true });
+    });
+
+    return row;
+  }
+
   /* ---------- rendering ---------- */
   function createCard(entry) {
+    if (config.watchable) return createRow(entry);
     const card = el("div", { class: "card" });
     const head = el("div", { class: "card-head" });
     const titleWrap = el("div", { class: "card-title-wrap" });
@@ -560,6 +691,10 @@
     const grid = document.getElementById("board-grid");
     const status = document.getElementById("board-status");
     if (!grid) return;
+    if (config.listMode) {
+      grid.classList.remove("grid");
+      grid.classList.add("board-list");
+    }
     grid.textContent = "";
     if (status) status.hidden = true;
     grid.hidden = false;

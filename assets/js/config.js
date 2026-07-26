@@ -19,5 +19,12 @@ window.HGS_CONFIG = {
       iv: "62Fha4vPFjJm9wUV",
       data: "jEssfbJwN49+8s8kAXzZc2R9D1sNSDfCStdcJ+J+acK9e3wwabI2uIdfwUxXoAnnqeS745LgL9rWox78aVnDDJD+w2MNh3E+dqr5hO/sO1+rUyNOANrL3hfxtxxZbuw5Vt0BVLuvZQGShc2CRg=="
     }
-  }
+  },
+
+  // Für die Filmempfehlungen (/filme/): kostenloser Account auf themoviedb.org,
+  // dann Einstellungen → API → "API-Schlüssel (v3 auth)" hier eintragen.
+  // Ohne Schlüssel bleibt der Empfehlungs-Block einfach ausgeblendet.
+  tmdb: {
+    apiKey: "",
+  },
 };
