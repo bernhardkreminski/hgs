@@ -9,13 +9,61 @@
   min-height: 100%;
 }
 
-/* Below-the-fold link cards act as plain link targets but keep card look */
+/* Below-the-fold link cards: modern glass tiles with arrow affordance */
 .card[href] {
+  position: relative;
   display: block;
+  overflow: hidden;
   text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background:
+    linear-gradient(rgba(22, 19, 26, 0.92), rgba(22, 19, 26, 0.92)) padding-box,
+    linear-gradient(165deg, rgba(255, 158, 77, 0.35), rgba(242, 239, 233, 0.1) 40%, rgba(200, 107, 152, 0.25)) border-box;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
-.card[href] h3 { color: var(--ink); }
-.card[href]:hover { opacity: 1; }
+.card[href]::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  pointer-events: none;
+}
+.card[href]::after {
+  content: "\2192";
+  position: absolute;
+  right: 1.4rem;
+  bottom: 1.15rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+}
+.card[href] h3 { color: var(--ink); transition: color 0.2s ease; }
+.card[href]:hover,
+.card[href]:focus-visible {
+  opacity: 1;
+  transform: translateY(-4px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  background:
+    linear-gradient(rgba(26, 22, 31, 0.95), rgba(26, 22, 31, 0.95)) padding-box,
+    linear-gradient(165deg, rgba(255, 158, 77, 0.65), rgba(242, 239, 233, 0.16) 40%, rgba(200, 107, 152, 0.45)) border-box;
+}
+.card[href]:hover h3 { color: var(--accent); }
+.card[href]:hover::after,
+.card[href]:focus-visible::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card[href]:hover { transform: none; }
+  .card[href]::after { transition: none; }
+}
 
 /* ---------- WG page: compact opener (not full-viewport) ----------
  * Note: <body class="has-solid-nav"> already adds padding-top: var(--nav-h)
@@ -228,7 +276,15 @@
 
 /* Group photo: compact presentation */
 .group-frame-compact {
-  max-width: 720px;
   margin-inline: auto;
 }
-.group-frame-compact img { aspect-ratio: 3 / 2; }
+.group-frame-compact img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 21 / 9;
+  object-fit: cover;
+  object-position: 50% 38%;
+}
+@media (max-width: 640px) {
+  .group-frame-compact img { aspect-ratio: 16 / 9; }
+}
