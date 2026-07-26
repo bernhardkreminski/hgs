@@ -61,7 +61,16 @@ Until crops exist, reference the final filenames anyway — the orchestrator gua
 Shared storage is LIVE (backend `github`, repo `hgs-data`). Reads are public; every write needs the WG code (modal; cache in `sessionStorage['hgs-code']`).
 Entry shapes — movies: `{id, title, description?, url?, createdAt}` (**description now OPTIONAL**) · workshops: `{id, title, description, host, date?, createdAt}` · blog: `{id, title, text, mood: 'top'|'flop', createdAt}`.
 
+## Board-page photo backgrounds (round 3)
+`/assets/img/bg-filme.jpg` (WG im Heimkino, ~1:1), `/assets/img/bg-workshops.jpg` (Basteltisch, ~2:1), `/assets/img/bg-blog.jpg` (Fußballplatz, ~1:1). Used as fixed, heavily dimmed full-page backgrounds behind the boards (dark scrim so cards stay readable, subtle slow effect allowed — keep text contrast first).
+
+## Hidden album page (orchestrator-owned)
+`/chebter-one/` — full-screen player for the HGS-produced album "Chebter One (Remastered)" (tracks at `/assets/audio/01.mp3` … `10.mp3`). NOT in the main nav. Agent A links it subtly from Cheb's tile on /wg/.
+
+## Delete security
+Delete must ALWAYS ask for the WG code — the sessionStorage code cache applies to add/edit only.
+
 ## File ownership (touch nothing outside your list)
-- Orchestrator: `base.css`, `store.js`, `config.js`, `data/*.json`, `DESIGN.md`, `README.md`, portrait crops
+- Orchestrator: `base.css`, `store.js`, `config.js`, `data/*.json`, `DESIGN.md`, `README.md`, image crops, `chebter-one/index.html`, `/assets/css/album.css`, `/assets/js/album.js`
 - Agent A: `index.html` (landing), `wg/index.html`, `/assets/css/home.css`
 - Agent B: `filme/index.html`, `workshops/index.html`, `blog/index.html`, `/assets/css/board.css`, `/assets/js/board.js`

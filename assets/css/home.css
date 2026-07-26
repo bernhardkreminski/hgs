@@ -1,24 +1,6 @@
 /* HGS — home.css: page-specific styles for index.html (landing) + wg/index.html.
  * Owned by Agent A. Builds on tokens/components from base.css — do not redefine those. */
 
-/* ---------- Landing hero: link row under the subline ---------- */
-.hero-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.7rem;
-  margin-top: 2rem;
-}
-.hero-links .btn {
-  border-color: rgba(242, 239, 233, 0.4);
-  background: rgba(14, 12, 16, 0.25);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.hero-links .btn:hover {
-  border-color: var(--ink);
-  background: rgba(14, 12, 16, 0.45);
-}
-
 /* Landing hero image: dark placeholder so a missing photo never looks broken */
 .panel-media {
   background-color: var(--bg-soft);
@@ -35,51 +17,162 @@
 .card[href] h3 { color: var(--ink); }
 .card[href]:hover { opacity: 1; }
 
-/* ---------- WG page: compact opener (not full-viewport) ---------- */
+/* ---------- WG page: compact opener (not full-viewport) ----------
+ * Note: <body class="has-solid-nav"> already adds padding-top: var(--nav-h)
+ * to <main> (see base.css), so this section must NOT add nav-h again —
+ * doing so previously wasted a full nav-bar's height above the fold. */
 .wg-opener {
-  padding: calc(var(--nav-h) + 2.5rem) 0 1rem;
+  padding: 1.1rem 0 0.7rem;
 }
-.wg-opener .section-title { margin-bottom: 0.5rem; }
+.wg-opener .eyebrow { margin-bottom: 0.4rem; }
+.wg-opener .section-title {
+  font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+  margin-bottom: 0.3rem;
+}
+.wg-opener .section-sub { margin-bottom: 0; }
 
-/* ---------- Person grid ---------- */
-.person-grid {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+/* ---------- People grid: quadratic poster wall ---------- */
+.people-grid {
+  list-style: none;
+  display: grid;
+  gap: 0.8rem;
+  grid-template-columns: repeat(2, 1fr);
 }
-.person {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  overflow: hidden;
-  transition: border-color 0.2s ease, background 0.2s ease;
+@media (min-width: 700px) {
+  .people-grid {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 980px;
+    margin-inline: auto;
+    gap: 0.9rem;
+  }
 }
-.person:hover { border-color: rgba(242, 239, 233, 0.28); background: var(--card-hover); }
-.person-photo {
-  width: 100%;
+
+.person-tile {
+  position: relative;
   aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+}
+.person-tile:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.person-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   display: block;
-  background-color: var(--bg-soft);
   filter: grayscale(0.85);
-  transition: filter 0.3s ease;
+  transition: filter 0.35s ease, transform 0.35s ease;
 }
-.person:hover .person-photo,
-.person:focus-within .person-photo {
+.person-tile:hover .person-photo,
+.person-tile:focus .person-photo,
+.person-tile:focus-within .person-photo {
   filter: grayscale(0);
+  transform: scale(1.045);
 }
-.person h3 {
-  font-size: 1.1rem;
+
+/* Fun fact: real text in the DOM, revealed as a sliding/fading scrim on
+   hover, keyboard focus, or (via :focus-within) tap on touch devices. */
+.person-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.8rem;
+  padding-bottom: 2.4rem;
+  background: linear-gradient(180deg, rgba(14, 12, 16, 0.05) 0%, rgba(14, 12, 16, 0.94) 72%);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.person-tile:hover .person-overlay,
+.person-tile:focus .person-overlay,
+.person-tile:focus-within .person-overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+.person-fact {
+  color: rgba(242, 239, 233, 0.92);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Name label: always visible, pinned bottom-left, own gradient so it reads
+   over both the plain photo and the fun-fact scrim. */
+.person-name {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 2;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  margin: 1rem 1.1rem 0.35rem;
+  background: linear-gradient(180deg, rgba(14, 12, 16, 0) 0%, rgba(14, 12, 16, 0.88) 85%);
+  pointer-events: none;
 }
-.person p {
+
+/* Cheb's quiet easter egg: a small note linking to the hidden album page. */
+.person-egg {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  z-index: 3;
+  width: 1.6rem;
+  height: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  color: rgba(242, 239, 233, 0.22);
+  background: transparent;
+  transition: color 0.25s ease, background 0.25s ease;
+}
+.person-tile:hover .person-egg,
+.person-tile:focus-within .person-egg {
+  color: rgba(242, 239, 233, 0.55);
+}
+.person-egg:hover,
+.person-egg:focus {
+  color: var(--accent);
+  background: rgba(14, 12, 16, 0.45);
+  opacity: 1;
+}
+
+/* 8th tile: accent filler completing the 4x2 wall — brand wordmark, not a photo. */
+.person-tile.fill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  text-align: center;
+  background: linear-gradient(155deg, var(--card) 0%, var(--bg-soft) 100%);
+}
+.fill-word {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  letter-spacing: -0.02em;
+}
+.fill-word .end { color: var(--accent); }
+.fill-sub {
   color: var(--ink-soft);
-  font-size: 0.9rem;
-  margin: 0 1.1rem 1.1rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .person-photo { transition: none; }
+  .person-photo,
+  .person-overlay { transition: none; }
 }
 
 /* ---------- Group photo frame ---------- */
@@ -127,7 +220,6 @@
 .poster-egg a:hover { border-color: var(--ink); }
 
 @media (max-width: 560px) {
-  .person-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  .hero-links { gap: 0.5rem; }
-  .hero-links .btn { padding: 0.55rem 1.1rem; font-size: 0.85rem; }
+  .people-grid { gap: 0.6rem; }
+  .person-fact { font-size: 0.76rem; }
 }

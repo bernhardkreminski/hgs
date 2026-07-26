@@ -479,9 +479,14 @@
     });
   }
 
-  /* ---------- write flow: code gate + HGSStore.save + re-render ---------- */
-  async function saveEntries(nextEntries, successMsg) {
-    let code = sessionStorage.getItem("hgs-code");
+  /* ---------- write flow: code gate + HGSStore.save + re-render ----------
+   * options.forceCode (used by delete) skips the sessionStorage shortcut so the
+   * WG code modal always opens — even if a valid code is cached from a prior
+   * add/edit in this session. On success the code is still cached for later
+   * add/edit calls. */
+  async function saveEntries(nextEntries, successMsg, options) {
+    const forceCode = !!(options && options.forceCode);
+    let code = forceCode ? null : sessionStorage.getItem("hgs-code");
     if (code) {
       let stillValid = false;
       try {
@@ -508,7 +513,7 @@
     } catch (err) {
       if (err && err.message === "bad-code") {
         sessionStorage.removeItem("hgs-code");
-        return saveEntries(nextEntries, successMsg); /* reprompt */
+        return saveEntries(nextEntries, successMsg, options); /* reprompt */
       }
       showToast("Speichern fehlgeschlagen…", true);
       return false;
@@ -545,7 +550,7 @@
       const confirmed = await openConfirmModal(entry.title);
       if (!confirmed) return;
       const next = entries.filter((e) => e.id !== entry.id);
-      await saveEntries(next, config.toastDelete);
+      await saveEntries(next, config.toastDelete, { forceCode: true });
     });
 
     return card;

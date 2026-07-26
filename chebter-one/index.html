@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chebter One (Remastered) · HGS</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/css/base.css">
+<link rel="stylesheet" href="/assets/css/album.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+</head>
+<body class="album-body">
+
+<header class="album-top">
+  <a class="nav-brand" href="/">← HGS<span class="brand-dot">.</span></a>
+  <span class="tag alt">Das erste HGS-Album</span>
+</header>
+
+<main class="album-stage">
+  <section class="album-hero">
+    <div class="vinyl" id="vinyl" aria-hidden="true">
+      <img src="/assets/img/p-cheb.jpg" alt="" width="600" height="600">
+      <span class="vinyl-hole"></span>
+    </div>
+    <div class="album-meta">
+      <span class="eyebrow">Aufgenommen &amp; produziert in der HGS</span>
+      <h1 class="statement album-title">Chebter One<span class="end">.</span></h1>
+      <p class="subline">Remastered · zehn Stücke von und mit Cheb.</p>
+      <div class="album-actions">
+        <button class="btn btn-primary" id="play-toggle" aria-label="Abspielen">▶&nbsp; Abspielen</button>
+        <button class="btn" id="listen-mode-btn">Listen Mode</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tracklist-wrap" aria-label="Titelliste">
+    <ol class="tracklist" id="tracklist"></ol>
+  </section>
+
+  <div class="player-bar" id="player-bar">
+    <button class="pb-btn" id="prev-btn" aria-label="Vorheriger Titel">⏮</button>
+    <button class="pb-btn pb-play" id="pb-play" aria-label="Abspielen/Pause">▶</button>
+    <button class="pb-btn" id="next-btn" aria-label="Nächster Titel">⏭</button>
+    <div class="pb-info">
+      <span class="pb-title" id="pb-title">—</span>
+      <div class="pb-seek">
+        <span class="pb-time" id="pb-current">0:00</span>
+        <input type="range" id="seek" min="0" max="100" value="0" step="0.1" aria-label="Position im Titel">
+        <span class="pb-time" id="pb-duration">0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="listen-overlay" id="listen-overlay" hidden>
+    <div class="lo-eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <p class="lo-album">Chebter One (Remastered)</p>
+    <h2 class="lo-title" id="lo-title">—</h2>
+    <div class="lo-controls">
+      <button class="pb-btn" id="lo-prev" aria-label="Vorheriger Titel">⏮</button>
+      <button class="pb-btn pb-play" id="lo-play" aria-label="Abspielen/Pause">▶</button>
+      <button class="pb-btn" id="lo-next" aria-label="Nächster Titel">⏭</button>
+    </div>
+    <button class="btn btn-ghost lo-exit" id="lo-exit">Verlassen</button>
+  </div>
+</main>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script src="/assets/js/album.js"></script>
+</body>
+</html>
