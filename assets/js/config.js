@@ -2,7 +2,7 @@
 window.HGS_CONFIG = {
   // 'local'  : Einträge liegen im localStorage des Geräts (Seed aus data/*.json)
   // 'github' : geteilter Speicher — Einträge liegen als JSON in einem GitHub-Repo
-  backend: "local",
+  backend: "github",
 
   // SHA-256 des Zugangscodes (der Code selbst steht bewusst nicht im Klartext hier)
   codeHash: "712dca40936b39ce670dc803736fe3735cf99311030a928de039a36f77926230",
@@ -14,6 +14,10 @@ window.HGS_CONFIG = {
     branch: "main",
     // Fine-grained PAT (nur Contents:write auf das Daten-Repo), AES-GCM-verschlüsselt,
     // Schlüssel wird per PBKDF2 aus dem Zugangscode abgeleitet. { salt, iv, data } als Base64.
-    encToken: null
+    encToken: {
+      salt: "XKB8WUcGcwIaCcq6CRy2qw==",
+      iv: "62Fha4vPFjJm9wUV",
+      data: "jEssfbJwN49+8s8kAXzZc2R9D1sNSDfCStdcJ+J+acK9e3wwabI2uIdfwUxXoAnnqeS745LgL9rWox78aVnDDJD+w2MNh3E+dqr5hO/sO1+rUyNOANrL3hfxtxxZbuw5Vt0BVLuvZQGShc2CRg=="
+    }
   }
 };
