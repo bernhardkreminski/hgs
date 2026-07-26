@@ -1,5 +1,5 @@
-/* HGS whiteboard engine — generic pinboard for movies.html and workshops.html.
- * Owned by Agent B. Configured per page via window.HGS_BOARD = { kind: "movies" | "workshops" }.
+/* HGS whiteboard engine — generic pinboard for /filme/, /workshops/ and /blog/.
+ * Owned by Agent B. Configured per page via window.HGS_BOARD = { kind: "movies" | "workshops" | "blog" }.
  * Uses HGSStore (assets/js/store.js) as the only data/write gateway.
  */
 (function () {
@@ -47,6 +47,13 @@
       return "";
     }
   }
+  function formatCreatedLong(iso) {
+    try {
+      return new Date(iso).toLocaleDateString("de-DE", { day: "numeric", month: "long", year: "numeric" });
+    } catch (_) {
+      return "";
+    }
+  }
 
   /* ---------- sort strategies ---------- */
   function sortByCreatedDesc(list) {
@@ -64,6 +71,32 @@
     upcoming.sort((a, b) => parseLocalDate(a.date) - parseLocalDate(b.date));
     rest.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return upcoming.concat(rest);
+  }
+
+  /* ---------- card body renderers (main content, kind-specific) ---------- */
+  function renderMovieBody(card, entry) {
+    if (entry.description) card.appendChild(el("p", {}, entry.description));
+  }
+  function renderWorkshopBody(card, entry) {
+    card.appendChild(el("p", {}, entry.description));
+  }
+  function renderBlogBody(card, entry) {
+    const body = el("div", { class: "entry-body" });
+    String(entry.text || "")
+      .split(/\n{2,}/)
+      .forEach((para) => {
+        const trimmed = para.trim();
+        if (!trimmed) return;
+        body.appendChild(el("p", {}, trimmed));
+      });
+    card.appendChild(body);
+  }
+
+  /* ---------- card tag renderers (small badge next to the title) ---------- */
+  function renderBlogTag(entry) {
+    return entry.mood === "top"
+      ? el("span", { class: "tag alt" }, "Top")
+      : el("span", { class: "tag" }, "Naja");
   }
 
   /* ---------- card meta renderers (kind-specific presentation) ---------- */
@@ -98,6 +131,9 @@
     }
     card.appendChild(row);
   }
+  function renderBlogMeta(card, entry) {
+    card.appendChild(el("p", { class: "date-meta muted" }, formatCreatedLong(entry.createdAt)));
+  }
 
   /* ---------- per-kind configuration ---------- */
   const CONFIGS = {
@@ -105,12 +141,19 @@
       modalTitleAdd: "Film eintragen",
       modalTitleEdit: "Film bearbeiten",
       emptyMessage: "Noch nichts hier — trag was ein!",
-      toastAdd: "Eingetragen! 🎬",
+      toastAdd: "Eingetragen!",
       toastEdit: "Gespeichert!",
       toastDelete: "Gelöscht.",
       fields: [
         { key: "title", label: "Titel", type: "text", required: true, placeholder: "z. B. Everything Everywhere All at Once" },
-        { key: "description", label: "Beschreibung", type: "textarea", required: true, placeholder: "Kurz, worum's geht…" },
+        {
+          key: "description",
+          label: "Beschreibung",
+          type: "textarea",
+          required: false,
+          placeholder: "Kurz, worum's geht… (optional)",
+          hint: "Optional.",
+        },
         {
           key: "url",
           label: "JustWatch-Link",
@@ -121,13 +164,14 @@
         },
       ],
       sort: sortByCreatedDesc,
+      renderBody: renderMovieBody,
       renderMeta: renderMovieMeta,
     },
     workshops: {
       modalTitleAdd: "Workshop eintragen",
       modalTitleEdit: "Workshop bearbeiten",
       emptyMessage: "Noch nichts hier — trag was ein!",
-      toastAdd: "Eingetragen! 🛠️",
+      toastAdd: "Eingetragen!",
       toastEdit: "Gespeichert!",
       toastDelete: "Gelöscht.",
       fields: [
@@ -137,7 +181,34 @@
         { key: "date", label: "Datum", type: "date", required: false },
       ],
       sort: sortWorkshops,
+      renderBody: renderWorkshopBody,
       renderMeta: renderWorkshopMeta,
+    },
+    blog: {
+      modalTitleAdd: "Moment eintragen",
+      modalTitleEdit: "Moment bearbeiten",
+      emptyMessage: "Noch nichts hier — trag den ersten Moment ein!",
+      toastAdd: "Eingetragen!",
+      toastEdit: "Gespeichert!",
+      toastDelete: "Gelöscht.",
+      fields: [
+        { key: "title", label: "Titel", type: "text", required: true, placeholder: "Kurzer Titel" },
+        { key: "text", label: "Was ist passiert?", type: "textarea", required: true, placeholder: "Erzähl kurz, was los war…" },
+        {
+          key: "mood",
+          label: "Stimmung",
+          type: "select",
+          required: true,
+          options: [
+            { value: "top", label: "Top-Moment" },
+            { value: "flop", label: "Naja-Moment" },
+          ],
+        },
+      ],
+      sort: sortByCreatedDesc,
+      renderTag: renderBlogTag,
+      renderBody: renderBlogBody,
+      renderMeta: renderBlogMeta,
     },
   };
 
@@ -336,6 +407,11 @@
         let inputEl;
         if (f.type === "textarea") {
           inputEl = el("textarea", { class: "input", id: inputId, rows: "3" });
+        } else if (f.type === "select") {
+          inputEl = el("select", { class: "input", id: inputId });
+          (f.options || []).forEach((opt) => {
+            inputEl.appendChild(el("option", { value: opt.value }, opt.label));
+          });
         } else {
           inputEl = el("input", {
             class: "input",
@@ -443,13 +519,19 @@
   function createCard(entry) {
     const card = el("div", { class: "card" });
     const head = el("div", { class: "card-head" });
-    const h3 = el("h3", {}, entry.title);
+    const titleWrap = el("div", { class: "card-title-wrap" });
+    if (config.renderTag) {
+      const tag = config.renderTag(entry);
+      if (tag) titleWrap.appendChild(tag);
+    }
+    titleWrap.appendChild(el("h3", {}, entry.title));
     const actions = el("div", { class: "card-actions" });
     const editBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Bearbeiten" }, "✏️");
     const deleteBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Löschen" }, "🗑");
     actions.append(editBtn, deleteBtn);
-    head.append(h3, actions);
-    card.append(head, el("p", {}, entry.description));
+    head.append(titleWrap, actions);
+    card.append(head);
+    config.renderBody(card, entry);
     config.renderMeta(card, entry);
 
     editBtn.addEventListener("click", async () => {

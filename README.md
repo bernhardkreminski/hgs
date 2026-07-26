@@ -1,36 +1,38 @@
 # HGS 🌇
 
-Die Website unserer WG — gebaut für [GitHub Pages](https://bernhardkreminski.github.io/hgs/).
+The website of our shared flat — live at **[hgs.house](https://hgs.house/)**.
 
-## Seiten
+## Pages
 
-| Seite | Datei | Beschreibung |
+| Page | Path | Description |
 |---|---|---|
-| Start | `index.html` | Landing Page mit Rooftop-Sunset-Hero |
-| Die WG | `about.html` | Generiertes Gruppen-Artwork + wer hier wohnt |
-| Filmliste | `movies.html` | Whiteboard: Filme, die wir noch schauen müssen |
-| Workshops | `workshops.html` | Whiteboard: Wer zeigt wem was |
+| Home | `/` | Full-screen rooftop hero, quick links to everything |
+| WG | `/wg/` | Who lives here — portraits & bios |
+| Filme | `/filme/` | Shared watchlist (movies we still need to watch) |
+| Workshops | `/workshops/` | Who teaches whom what |
+| Blog | `/blog/` | Great (and not so great) moments |
 
-## Whiteboards
+## Shared boards
 
-Alle können Einträge **lesen**. Zum **Eintragen/Ändern/Löschen** braucht es den WG-Code
-(ihr wisst schon — steht am Kühlschrank 😉).
+Everyone can **read** the boards. **Adding, editing or deleting** entries requires the
+flat's access code (you know — it's on the fridge 😉).
 
-Die Einträge liegen als JSON im Repo [`hgs-data`](https://github.com/bernhardkreminski/hgs-data)
-und werden per GitHub-API geschrieben. Der dafür nötige Token ist mit dem WG-Code
-verschlüsselt (PBKDF2 + AES-GCM) in `assets/js/config.js` hinterlegt und hat nur
-Schreibrechte auf `hgs-data` — schlimmstenfalls malt jemand das Whiteboard voll,
-und das lässt sich über die Git-History jederzeit zurückholen.
+Entries are stored as JSON in the [`hgs-data`](https://github.com/bernhardkreminski/hgs-data)
+repo and written via the GitHub API. The token used for writes is encrypted with the
+access code (PBKDF2 + AES-GCM) in `assets/js/config.js` and only has write access to
+`hgs-data` — worst case someone scribbles on the whiteboard, and git history lets us
+restore it anytime.
 
-Backend umschalten: `assets/js/config.js` → `backend: "github" | "local"`.
+Switch storage backend: `assets/js/config.js` → `backend: "github" | "local"`.
 
-## Entwicklung
+## Development
 
-Kein Build, kein Framework — statisches HTML/CSS/JS. Lokal einfach:
+No build step, no framework — plain HTML/CSS/JS. Locally:
 
 ```bash
 python3 -m http.server 8000
 # → http://localhost:8000
 ```
 
-Design-System & Konventionen: siehe [`DESIGN.md`](DESIGN.md).
+Note: pages use root-absolute paths (`/assets/…`), so serve from the repo root.
+Design system & conventions: see [`DESIGN.md`](DESIGN.md).

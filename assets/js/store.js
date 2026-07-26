@@ -73,16 +73,20 @@
       }
       const api = "https://api.github.com/repos/" + g.owner + "/" + g.repo + "/contents/" + kind + ".json";
       const headers = { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" };
-      let sha;
-      const head = await fetch(api + "?ref=" + g.branch + "&t=" + Date.now(), { headers, cache: "no-store" });
-      if (head.ok) sha = (await head.json()).sha;
-      const body = {
-        message: "whiteboard: update " + kind,
-        content: btoa(unescape(encodeURIComponent(JSON.stringify(entries, null, 2)))),
-        branch: g.branch,
+      const putOnce = async () => {
+        let sha;
+        const head = await fetch(api + "?ref=" + g.branch + "&t=" + Date.now(), { headers, cache: "no-store" });
+        if (head.ok) sha = (await head.json()).sha;
+        const body = {
+          message: "whiteboard: update " + kind,
+          content: btoa(unescape(encodeURIComponent(JSON.stringify(entries, null, 2)))),
+          branch: g.branch,
+        };
+        if (sha) body.sha = sha;
+        return fetch(api, { method: "PUT", headers, body: JSON.stringify(body) });
       };
-      if (sha) body.sha = sha;
-      const res = await fetch(api, { method: "PUT", headers, body: JSON.stringify(body) });
+      let res = await putOnce();
+      if (res.status === 409) res = await putOnce(); /* sha veraltet (paralleler Write) — einmal neu versuchen */
       if (!res.ok) throw new Error("save-failed");
     },
   };

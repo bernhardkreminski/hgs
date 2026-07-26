@@ -1,20 +1,12 @@
-/* HGS whiteboard engine styles (movies.html / workshops.html).
+/* HGS whiteboard engine styles (/filme/, /workshops/, /blog/).
  * Owned by Agent B. Loaded after base.css — only adds to it, never overrides tokens. */
 
-/* ---------- Header flourish ---------- */
+/* ---------- Compact page header (no full-viewport panel — list stays visible) ---------- */
 .board-header {
-  position: relative;
-  overflow: hidden;
+  padding-top: calc(var(--nav-h) + 2.6rem);
+  padding-bottom: 1.2rem;
 }
-.board-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 15% -10%, rgba(255, 180, 94, 0.16), transparent 55%);
-  pointer-events: none;
-}
-.board-header .container { position: relative; }
-.board-header .btn-primary { margin-top: 1.4rem; }
+.board-header .btn-primary { margin-top: 1.5rem; }
 
 .board-status { margin-bottom: 1rem; }
 
@@ -24,49 +16,75 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.5rem;
 }
-.card-head h3 { flex: 1; }
+.card-title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.card-title-wrap h3 { margin: 0; }
 
-.card-actions { display: flex; gap: 0.15rem; flex-shrink: 0; }
+/* Hairline pill housing the two icon buttons — calm, not loud */
+.card-actions {
+  display: flex;
+  gap: 0.1rem;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.15rem;
+}
 .icon-btn {
   background: transparent;
   border: none;
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   line-height: 1;
-  padding: 0.35rem 0.45rem;
-  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  border-radius: 999px;
   cursor: pointer;
-  opacity: 0.55;
-  transition: opacity 0.15s ease, background 0.15s ease;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  transition: opacity 0.15s ease, background 0.15s ease, color 0.15s ease;
 }
-.icon-btn:hover { opacity: 1; background: rgba(247, 239, 230, 0.08); }
+.icon-btn:hover { opacity: 1; color: var(--ink); background: rgba(242, 239, 233, 0.08); }
 .icon-btn:focus-visible {
   opacity: 1;
-  outline: 2px solid var(--accent);
+  outline: 1px solid var(--accent);
   outline-offset: 1px;
 }
 
+/* Blog entry body: multiple paragraphs, calm spacing */
+.entry-body p + p { margin-top: 0.7rem; }
+
 .date-meta {
   display: block;
-  margin-top: 0.85rem;
-  font-size: 0.82rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
 }
 .justwatch-link {
   display: inline-block;
   margin-top: 0.6rem;
   font-weight: 600;
+  font-size: 0.92rem;
 }
 
 .tags-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-top: 0.85rem;
+  margin-top: 1rem;
 }
-.tag.is-past { opacity: 0.55; }
+.tag.is-past { opacity: 0.5; }
 
-.empty-card { text-align: center; padding: 2.5rem 1.5rem; }
+.empty-card {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-style: dashed;
+}
 .empty-card p { font-size: 1.02rem; margin: 0; }
 
 /* ---------- Form validation ---------- */
@@ -77,7 +95,20 @@
 }
 .input.invalid { border-color: var(--accent-2); }
 
-/* ---------- Code-modal shake ---------- */
+/* Custom chevron on selects (mood choice) so it matches .input styling */
+select.input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink-soft) 50%),
+    linear-gradient(135deg, var(--ink-soft) 50%, transparent 50%);
+  background-position: calc(100% - 1.15rem) center, calc(100% - 0.8rem) center;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2.2rem;
+}
+
+/* ---------- Code-modal shake (wrong access code) ---------- */
 @keyframes hgs-shake {
   10%, 90% { transform: translateX(-1px); }
   20%, 80% { transform: translateX(2px); }
@@ -88,4 +119,5 @@
 
 @media (max-width: 560px) {
   .card-head { flex-wrap: wrap; }
+  .board-header { padding-top: calc(var(--nav-h) + 1.8rem); }
 }
