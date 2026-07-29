@@ -1,0 +1,17 @@
+{
+  "name": "HGS — sieben Leute, ein Dach",
+  "short_name": "HGS",
+  "description": "Die Website unserer WG: die Leute, die Filmliste, die Workshops und der Blog.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0e0c10",
+  "theme_color": "#0e0c10",
+  "lang": "de",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/icon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/icon-512.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}
