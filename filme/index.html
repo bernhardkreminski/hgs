@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/base.css">
 <link rel="stylesheet" href="/assets/css/board.css">
+<link rel="stylesheet" href="/assets/css/pull-refresh.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -42,6 +43,7 @@
   <section class="section board-section">
     <div class="container">
       <p id="board-status" class="muted board-status" aria-live="polite">Lade…</p>
+      <div id="board-filters" class="filter-bar" hidden></div>
       <div id="board-grid" class="grid" hidden></div>
     </div>
   </section>
@@ -64,6 +66,7 @@
 <script src="/assets/js/config.js"></script>
 <script src="/assets/js/store.js"></script>
 <script>window.HGS_BOARD = { kind: "movies" };</script>
+<script src="/assets/js/pull-to-refresh.js"></script>
 <script src="/assets/js/board.js"></script>
 <script src="/assets/js/recommendations.js"></script>
 </body>

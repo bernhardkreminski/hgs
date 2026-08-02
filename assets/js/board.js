@@ -26,6 +26,50 @@
     return node;
   }
 
+  /* ---------- tags ----------
+   * Stimmungs-Tags sind eine feste Auswahl, damit die Liste nicht ausfranst
+   * ("Zum Lachen" vs. "zum lachen" vs. "lustig"). Gespeichert wird nur der Text;
+   * das Emoji kommt erst beim Anzeigen dazu, die Daten bleiben also sauber.
+   * Eigene Tags (Genre, Regisseur, "Filmabend Freitag") sind zusätzlich erlaubt. */
+  const MOOD_TAGS = [
+    { value: "Zum Lachen", emoji: "😂" },
+    { value: "Spannend", emoji: "🍿" },
+    { value: "Zum Weinen", emoji: "😢" },
+    { value: "Gruselig", emoji: "😱" },
+    { value: "Zum Nachdenken", emoji: "🧠" },
+    { value: "Herzerwärmend", emoji: "🥰" },
+    { value: "Action", emoji: "💥" },
+    { value: "Feelgood", emoji: "✨" },
+    { value: "Verstörend", emoji: "🌀" },
+    { value: "Romantisch", emoji: "❤️" },
+    { value: "Nebenbei", emoji: "😴" },
+    { value: "Anspruchsvoll", emoji: "🎬" },
+  ];
+  const MOOD_EMOJI = {};
+  const MOOD_ORDER = {};
+  MOOD_TAGS.forEach((m, i) => {
+    MOOD_EMOJI[m.value] = m.emoji;
+    MOOD_ORDER[m.value] = i;
+  });
+  const MAX_TAG_LENGTH = 24;
+
+  function tagList(entry) {
+    if (!Array.isArray(entry && entry.tags)) return [];
+    return entry.tags.map((t) => String(t).trim()).filter(Boolean);
+  }
+  function tagLabel(tag) {
+    return MOOD_EMOJI[tag] ? MOOD_EMOJI[tag] + " " + tag : tag;
+  }
+  /* Stimmungen zuerst (in der Reihenfolge oben), eigene Tags danach alphabetisch */
+  function compareTags(a, b) {
+    const ma = MOOD_ORDER[a];
+    const mb = MOOD_ORDER[b];
+    if (ma !== undefined && mb !== undefined) return ma - mb;
+    if (ma !== undefined) return -1;
+    if (mb !== undefined) return 1;
+    return a.localeCompare(b, "de");
+  }
+
   /* ---------- date helpers ---------- */
   function startOfDay(d) {
     return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -271,11 +315,19 @@
           placeholder: "https://www.justwatch.com/de/…",
           hint: "Optional, aber gern gesehen.",
         },
+        {
+          key: "tags",
+          label: "Stimmung & Tags",
+          type: "tags",
+          required: false,
+          hint: "Optional. Stimmung antippen — eigene Tags gehen auch.",
+        },
       ],
       sort: sortMovies,
       listMode: true,
       watchable: true,
       splitWatched: true,
+      taggable: true,
       renderBody: renderMovieBody,
       renderMeta: renderMovieMeta,
     },
@@ -338,6 +390,7 @@
   }
 
   let entries = [];
+  let activeTags = []; /* Tag-Filter der Filmliste — leer heißt "alles zeigen" */
 
   /* ---------- modal stack (Esc closes topmost, backdrop click closes it) ---------- */
   const modalStack = [];
@@ -584,6 +637,87 @@
           controls[f.key] = { imagesField: true, kept, added, errorEl };
           return;
         }
+        if (f.type === "tags") {
+          /* Sonderfall wie bei den Bildern: kein einzelnes Wertfeld, sondern
+           * antippbare Stimmungen plus ein kleines Eingabefeld für eigene Tags. */
+          const chosen = tagList(existingEntry || {});
+          const presetRow = el("div", { class: "tag-picker" });
+          const customRow = el("div", { class: "tag-picker custom", hidden: true });
+
+          function toggleTag(tag) {
+            const idx = chosen.indexOf(tag);
+            if (idx === -1) chosen.push(tag);
+            else chosen.splice(idx, 1);
+            drawPicker();
+          }
+          function drawPicker() {
+            presetRow.textContent = "";
+            MOOD_TAGS.forEach((mood) => {
+              const active = chosen.indexOf(mood.value) !== -1;
+              const chip = el(
+                "button",
+                {
+                  type: "button",
+                  class: "tag-chip" + (active ? " is-active" : ""),
+                  "aria-pressed": active ? "true" : "false",
+                },
+                tagLabel(mood.value)
+              );
+              chip.addEventListener("click", () => toggleTag(mood.value));
+              presetRow.appendChild(chip);
+            });
+
+            customRow.textContent = "";
+            const custom = chosen.filter((t) => MOOD_EMOJI[t] === undefined);
+            custom.forEach((tag) => {
+              const chip = el("span", { class: "tag-chip is-active is-custom" }, tag);
+              const rm = el(
+                "button",
+                { type: "button", class: "tag-chip-remove", "aria-label": "Tag „" + tag + "“ entfernen" },
+                "✕"
+              );
+              rm.addEventListener("click", () => toggleTag(tag));
+              chip.appendChild(rm);
+              customRow.appendChild(chip);
+            });
+            customRow.hidden = custom.length === 0;
+          }
+
+          const addRow = el("div", { class: "tag-add-row" });
+          const tagInput = el("input", {
+            class: "input tag-input",
+            id: inputId,
+            type: "text",
+            maxlength: String(MAX_TAG_LENGTH),
+            placeholder: "Eigener Tag…",
+            autocomplete: "off",
+          });
+          const addBtn = el("button", { type: "button", class: "btn btn-ghost btn-small" }, "+ Tag");
+          function addCustomTag() {
+            const value = tagInput.value.trim().slice(0, MAX_TAG_LENGTH);
+            tagInput.value = "";
+            if (!value) return;
+            /* Groß-/Kleinschreibung egal — sonst stehen "Klassiker" und "klassiker" nebeneinander */
+            const known = chosen.some((t) => t.toLowerCase() === value.toLowerCase());
+            if (!known) chosen.push(value);
+            drawPicker();
+          }
+          addBtn.addEventListener("click", addCustomTag);
+          tagInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault(); /* sonst würde das Formular abschicken */
+              addCustomTag();
+            }
+          });
+          addRow.append(tagInput, addBtn);
+
+          drawPicker();
+          wrap.append(label, presetRow, customRow, addRow);
+          if (f.hint) wrap.append(el("p", { class: "hint" }, f.hint));
+          form.appendChild(wrap);
+          controls[f.key] = { tagsField: true, chosen };
+          return;
+        }
         if (f.type === "textarea") {
           inputEl = el("textarea", { class: "input", id: inputId, rows: "3" });
         } else if (f.type === "select") {
@@ -636,6 +770,10 @@
           if (ctrl.imagesField) {
             data[f.key] = ctrl.kept.slice();
             data._pendingImages = ctrl.added.slice();
+            return;
+          }
+          if (ctrl.tagsField) {
+            data[f.key] = ctrl.chosen.slice().sort(compareTags);
             return;
           }
           const { inputEl, errorEl } = ctrl;
@@ -744,6 +882,101 @@
     return { data, code };
   }
 
+  /* ---------- Tag-Filter (nur Filme) ----------
+   * Mehrere Tags gleichzeitig heißt "oder": gezeigt wird, was mindestens einen
+   * der gewählten Tags trägt. Bei Stimmungen ist das die nützlichere Lesart —
+   * "Zum Lachen UND Gruselig" wäre fast immer leer. */
+  function matchesFilter(entry) {
+    if (activeTags.length === 0) return true;
+    const tags = tagList(entry);
+    return activeTags.some((t) => tags.indexOf(t) !== -1);
+  }
+
+  function toggleFilter(tag) {
+    const idx = activeTags.indexOf(tag);
+    if (idx === -1) activeTags.push(tag);
+    else activeTags.splice(idx, 1);
+    renderGrid();
+  }
+
+  function renderFilters() {
+    const bar = document.getElementById("board-filters");
+    if (!bar) return;
+
+    const counts = new Map();
+    entries.forEach((entry) => {
+      tagList(entry).forEach((tag) => counts.set(tag, (counts.get(tag) || 0) + 1));
+    });
+    /* Tags, die es nicht mehr gibt (Eintrag gelöscht oder geändert), nicht weiterfiltern */
+    activeTags = activeTags.filter((t) => counts.has(t));
+
+    bar.textContent = "";
+    if (counts.size === 0) {
+      bar.hidden = true;
+      return;
+    }
+    bar.hidden = false;
+
+    const chips = el("div", { class: "filter-chips" });
+    const allChip = el(
+      "button",
+      {
+        type: "button",
+        class: "filter-chip" + (activeTags.length === 0 ? " is-active" : ""),
+        "aria-pressed": activeTags.length === 0 ? "true" : "false",
+      },
+      "Alle"
+    );
+    allChip.addEventListener("click", () => {
+      if (activeTags.length === 0) return;
+      activeTags = [];
+      renderGrid();
+    });
+    chips.appendChild(allChip);
+
+    Array.from(counts.keys())
+      .sort(compareTags)
+      .forEach((tag) => {
+        const active = activeTags.indexOf(tag) !== -1;
+        const chip = el(
+          "button",
+          {
+            type: "button",
+            class: "filter-chip" + (active ? " is-active" : ""),
+            "aria-pressed": active ? "true" : "false",
+          },
+          tagLabel(tag)
+        );
+        chip.appendChild(el("span", { class: "filter-count" }, String(counts.get(tag))));
+        chip.addEventListener("click", () => toggleFilter(tag));
+        chips.appendChild(chip);
+      });
+
+    bar.append(el("p", { class: "filter-label" }, "Filtern nach Stimmung & Tags"), chips);
+  }
+
+  /* Tag-Chips im Eintrag — ein Klick filtert die Liste danach */
+  function renderEntryTags(container, entry) {
+    const tags = tagList(entry).slice().sort(compareTags);
+    if (tags.length === 0) return;
+    const row = el("div", { class: "row-tags" });
+    tags.forEach((tag) => {
+      const active = activeTags.indexOf(tag) !== -1;
+      const chip = el(
+        "button",
+        {
+          type: "button",
+          class: "tag row-tag" + (active ? " is-active" : ""),
+          "aria-label": "Nach „" + tag + "“ filtern",
+        },
+        tagLabel(tag)
+      );
+      chip.addEventListener("click", () => toggleFilter(tag));
+      row.appendChild(chip);
+    });
+    container.appendChild(row);
+  }
+
   /* ---------- rendering: list rows (movies) ----------
    * Checkbox = "gesehen". Beim Abhaken öffnet sich inline ein Datumsfeld
    * ("Wann geschaut?"); erst Speichern schreibt (Code-Gate wie immer). */
@@ -801,6 +1034,7 @@
     }
     main.appendChild(titleLine);
     if (entry.description) main.appendChild(el("p", { class: "row-desc" }, entry.description));
+    if (config.taggable) renderEntryTags(main, entry);
 
     const metaRow = el("div", { class: "row-meta" });
     if (entry.url && /^https?:\/\//i.test(entry.url)) {
@@ -908,6 +1142,7 @@
     grid.textContent = "";
     if (status) status.hidden = true;
     grid.hidden = false;
+    if (config.taggable) renderFilters(); /* setzt auch nicht mehr vorhandene Filter zurück */
 
     if (entries.length === 0) {
       const emptyCard = el("div", { class: "card empty-card" });
@@ -916,15 +1151,34 @@
       return;
     }
 
+    const visible = config.taggable ? entries.filter(matchesFilter) : entries;
+
+    if (visible.length === 0) {
+      const noMatch = el("div", { class: "card empty-card" });
+      noMatch.appendChild(el("p", { class: "muted" }, "Kein Film mit diesen Tags."));
+      const reset = el("button", { type: "button", class: "btn btn-ghost btn-small" }, "Filter zurücksetzen");
+      reset.addEventListener("click", () => {
+        activeTags = [];
+        renderGrid();
+      });
+      noMatch.appendChild(reset);
+      grid.appendChild(noMatch);
+      return;
+    }
+
     /* Filme: zwei getrennte Listen — offene Watchlist und schon Gesehenes */
     if (config.splitWatched) {
-      const open = config.sort(entries.filter((e) => !e.watched));
-      const seen = config.sort(entries.filter((e) => e.watched));
+      const open = config.sort(visible.filter((e) => !e.watched));
+      const seen = config.sort(visible.filter((e) => e.watched));
+
+      const filtering = activeTags.length > 0;
 
       grid.appendChild(el("h2", { class: "list-group-title" }, "Watchlist"));
       if (open.length === 0) {
         const done = el("div", { class: "card empty-card" });
-        done.appendChild(el("p", { class: "muted" }, "Alles abgehakt — Zeit für Nachschub!"));
+        done.appendChild(
+          el("p", { class: "muted" }, filtering ? "Nichts Offenes mit diesen Tags." : "Alles abgehakt — Zeit für Nachschub!")
+        );
         grid.appendChild(done);
       } else {
         open.forEach((entry) => grid.appendChild(createCard(entry)));
@@ -935,7 +1189,15 @@
       grid.appendChild(seenTitle);
       if (seen.length === 0) {
         const none = el("div", { class: "card empty-card" });
-        none.appendChild(el("p", { class: "muted" }, "Noch nichts abgehakt. Häkchen setzen, sobald ihr was geschaut habt."));
+        none.appendChild(
+          el(
+            "p",
+            { class: "muted" },
+            filtering
+              ? "Nichts Gesehenes mit diesen Tags."
+              : "Noch nichts abgehakt. Häkchen setzen, sobald ihr was geschaut habt."
+          )
+        );
         grid.appendChild(none);
       } else {
         seen.forEach((entry) => grid.appendChild(createCard(entry)));
@@ -943,7 +1205,7 @@
       return;
     }
 
-    config.sort(entries).forEach((entry) => grid.appendChild(createCard(entry)));
+    config.sort(visible).forEach((entry) => grid.appendChild(createCard(entry)));
   }
 
   /* ---------- init ---------- */
@@ -974,25 +1236,38 @@
     /* Offene Seite aktualisieren, wenn sie wieder in den Vordergrund kommt —
      * sonst sieht man Einträge nicht, die jemand anderes zwischenzeitlich
      * eingetragen oder abgehakt hat. Nicht stören, während gerade jemand
-     * tippt (Modal offen) oder ein Datum eingibt. */
+     * tippt (Modal offen) oder ein Datum eingibt.
+     * force = die Aktualisierung wurde ausdrücklich verlangt (Pull-to-Refresh):
+     * dann ohne Wartezeit und ohne Sichtbarkeitsprüfung. */
     let lastRefresh = Date.now();
-    async function refresh() {
-      if (document.visibilityState !== "visible") return;
-      if (Date.now() - lastRefresh < 10000) return;
-      if (document.querySelector(".modal-backdrop") || document.querySelector(".watch-date-row")) return;
+    async function reloadEntries(force) {
+      if (!force) {
+        if (document.visibilityState !== "visible") return true;
+        if (Date.now() - lastRefresh < 10000) return true;
+        if (document.querySelector(".modal-backdrop") || document.querySelector(".watch-date-row")) return true;
+      }
       lastRefresh = Date.now();
       let fresh;
       try {
         fresh = await HGSStore.load(KIND);
       } catch (_) {
-        return;
+        return false;
       }
-      if (JSON.stringify(fresh) === JSON.stringify(entries)) return;
+      if (JSON.stringify(fresh) === JSON.stringify(entries)) return true;
       entries = fresh;
       renderGrid();
+      return true;
     }
-    document.addEventListener("visibilitychange", refresh);
-    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", () => reloadEntries(false));
+    window.addEventListener("focus", () => reloadEntries(false));
+
+    /* Nach unten ziehen holt die Einträge frisch (assets/js/pull-to-refresh.js) */
+    if (window.HGSRefresh) {
+      window.HGSRefresh.register(async () => {
+        const ok = await reloadEntries(true);
+        showToast(ok ? "Aktualisiert." : "Aktualisieren fehlgeschlagen…", !ok);
+      });
+    }
   }
 
   if (document.readyState === "loading") {
