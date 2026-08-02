@@ -1,0 +1,95 @@
+name: Notify on board changes
+
+# Emails one digest a morning: what was added, edited or deleted on /filme/,
+# /workshops/ and /blog/.
+#
+# Everything sensitive is a repository secret — the recipient address included,
+# so it never appears in this repo. With the secrets unset the job still runs
+# and succeeds; the script just reports that it skipped.
+#
+# Required secrets:
+#   NOTIFY_TO   SMTP_HOST   SMTP_USER   SMTP_PASS
+# Optional:
+#   SMTP_PORT (default 465)   SMTP_FROM (default SMTP_USER)
+#
+# See docs/DEPLOYMENT.md for the setup walkthrough.
+
+on:
+  schedule:
+    # One digest a day at 09:00 local time (Europe/Berlin).
+    #
+    # GitHub cron is UTC and does not follow DST, so no single expression is
+    # 09:00 local all year: 07:00 UTC is 09:00 in summer but 08:00 in winter.
+    # Four candidate slots fire instead, and the script sends on the first one
+    # at or after 09:00 local, at most once per day (NOTIFY_DIGEST_HOUR below).
+    # The extra slots also absorb GitHub's habit of starting scheduled jobs
+    # late — a run delayed past its hour is caught by the next one.
+    #
+    #   summer (CEST)  07,08,09,10 UTC -> 09,10,11,12 local, sends at 09
+    #   winter (CET)   07,08,09,10 UTC -> 08,09,10,11 local, sends at 09
+    - cron: '0 7,8,9,10 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Print the mail to the log instead of sending it'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: notify-board
+  # Never cancel: a cancelled run may have sent the mail but not yet stored its
+  # snapshot, and the same changes would then go out again tomorrow.
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Detect changes and send mail
+        env:
+          DATA_REPO: bernhardkreminski/hgs-data
+          DATA_BRANCH: main
+          # Only raises the API rate limit; the data repo is public.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NOTIFY_TO: ${{ secrets.NOTIFY_TO }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          NOTIFY_DRY_RUN: ${{ inputs.dry_run && '1' || '' }}
+          # Only scheduled runs wait for the morning. A manual dispatch is
+          # someone asking for it now, so it sends whatever is pending.
+          NOTIFY_DIGEST_HOUR: ${{ github.event_name == 'schedule' && '9' || '' }}
+          TZ: Europe/Berlin
+        run: node .github/scripts/notify-changes.mjs
+
+      - name: Commit the snapshot if it changed
+        run: |
+          if [ -z "$(git status --porcelain -- .github/notify-state.json)" ]; then
+            echo "No snapshot change to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/notify-state.json
+          # [skip ci] keeps this commit from triggering a pointless Pages deploy.
+          git commit -m "chore: refresh board notification state [skip ci]"
+          for attempt in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "Push rejected (attempt $attempt) — rebasing onto origin/main."
+            git pull --rebase origin main
+          done
+          echo "Could not push the snapshot after 3 attempts." >&2
+          exit 1
