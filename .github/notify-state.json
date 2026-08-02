@@ -1,0 +1,137 @@
+{
+  "version": 1,
+  "updatedAt": "2026-08-02T19:24:22.055Z",
+  "lastMailedOn": "",
+  "boards": {
+    "movies": {
+      "e-ms1w11fv-ubi6dj": {
+        "title": "Die Nackte Kanone",
+        "createdAt": "2026-07-26T14:22:57.931Z",
+        "description": "Lustiger Film, evtl mit cringe\nAuf jeden Fall auf Deutsch anschauen",
+        "url": "https://www.justwatch.com/de/Film/Die-Nackte-Kanone",
+        "tags": [],
+        "watched": false,
+        "watchedAt": ""
+      },
+      "e-ms1zhgzz-uhv00f": {
+        "title": "Get Shorty",
+        "createdAt": "2026-07-26T15:59:43.439Z",
+        "description": "",
+        "url": "https://www.justwatch.com/de/Film/Schnappt-Shorty",
+        "tags": [],
+        "watched": true,
+        "watchedAt": "2026-05-22"
+      },
+      "e-ms20588z-4fmze9": {
+        "title": "RRR",
+        "createdAt": "2026-07-26T16:18:11.843Z",
+        "description": "",
+        "url": "https://www.justwatch.com/de/Film/raudrN-rnnN-rudhirN",
+        "tags": [],
+        "watched": true,
+        "watchedAt": "2026-04-26"
+      },
+      "e-ms21e0ma-gduupy": {
+        "title": "Serenity",
+        "createdAt": "2026-07-26T16:53:01.474Z",
+        "description": "",
+        "url": "https://www.justwatch.com/de/Film/Serenity-Flucht-in-neue-Welten",
+        "tags": [],
+        "watched": true,
+        "watchedAt": "2026-07-26"
+      },
+      "e-ms30lwzo-ucap4a": {
+        "title": "Once upon a time in hollywood",
+        "createdAt": "2026-07-27T09:18:56.580Z",
+        "description": "",
+        "url": "https://www.justwatch.com/de/Film/Once-Upon-a-Time-in-Hollywood",
+        "tags": [],
+        "watched": false,
+        "watchedAt": ""
+      },
+      "e-msamlv1u-zfny22": {
+        "title": "Pulp Fiction",
+        "createdAt": "2026-08-01T17:09:08.850Z",
+        "description": "Klassiker",
+        "url": "https://www.justwatch.com/de/Film/Pulp-Fiction",
+        "tags": [],
+        "watched": false,
+        "watchedAt": ""
+      },
+      "e-msamn2ij-w6pn9w": {
+        "title": "Idiocrazy",
+        "createdAt": "2026-08-01T17:10:05.179Z",
+        "description": "Dystopische Zukunfts Parodie. Zukunft?",
+        "url": "https://www.justwatch.com/de/Film/Idiocracy-Irrsinn-stirbt-nie",
+        "tags": [],
+        "watched": false,
+        "watchedAt": ""
+      },
+      "e-msark5ye-nd94oe": {
+        "title": "Matrx I-IV",
+        "createdAt": "2026-08-01T19:27:47.750Z",
+        "description": "",
+        "url": "https://www.justwatch.com/de/Film/Matrix",
+        "tags": [
+          "Spannend",
+          "Action"
+        ],
+        "watched": false,
+        "watchedAt": ""
+      }
+    },
+    "workshops": {
+      "e-ms1w2chf-9dds9h": {
+        "title": "Handstand Workshop",
+        "createdAt": "2026-07-26T14:23:58.899Z",
+        "description": "Lea lernt uns wie wir einen Handstand machen",
+        "host": "Lea",
+        "date": ""
+      },
+      "e-ms1w37bz-5d50we": {
+        "title": "Steuerseminar",
+        "createdAt": "2026-07-26T14:24:38.879Z",
+        "description": "Wie können wir am meisten Geld am Fiskus vorbei schmuggeln",
+        "host": "Berni",
+        "date": ""
+      },
+      "e-ms1w4n7b-5azi0q": {
+        "title": "Finanzseminar",
+        "createdAt": "2026-07-26T14:25:46.103Z",
+        "description": "Reinmetall oder doch lieber Roh-Öl\nKomm in Berni's Finanzseminar für unseriöse Tipps wie Riester Rente und Altersarmut",
+        "host": "Berni",
+        "date": ""
+      },
+      "e-ms7xz5ix-0exmk7": {
+        "title": "Aufwändiges Taschenmanagement",
+        "createdAt": "2026-07-30T20:04:06.201Z",
+        "description": "Ob Bikepacking, Multiday-Hiking oder der wöchentliche Sportkletterausflug an den Fels: Ein konsequent überkomplexes Management von Rucksack und Taschen ist essenziell. Mit den richtigen Tipps und Tricks sorgst du zuverlässig für unerwartet lange Wartezeiten in deiner Ausflugsgruppe.\nGezielte, taktische Umsortierungen garantieren maximalen Überblicksverlust. So endet selbst der kleinste Wunsch nach einer banalität in einer reizvollen Komplettentleerung deines Hab und Guts an Ort und Stelle.\nMach mit und überzeug dich selbst wie vollkommen irrelevante Dinge griffbereit bleiben währendessen die wichtigen Gegenstände einfach unauffindbar bleiben.\n\nPS: Wo ist eigentlich die Stirnlampe?",
+        "host": "Cheb",
+        "date": ""
+      }
+    },
+    "blog": {
+      "e-ms1vyg1k-ws95qe": {
+        "title": "Löwen WG Party",
+        "createdAt": "2026-07-26T14:20:56.888Z",
+        "text": "Gestern war Löwen WG Party 🎉\nDas war toll, viel lustige Leute waren da.\nNur die Musik war grottig\nHGS: \"Heute gute Stimmung\"",
+        "mood": "flop",
+        "images": 0
+      },
+      "b-hintergruende": {
+        "title": "Die Bilder hinter der Website",
+        "createdAt": "2026-08-02T08:28:26.973Z",
+        "text": "Jede Seite hier hat ihr eigenes Bild im Hintergrund — schön abgedunkelt, damit die Texte lesbar bleiben, und mit einer ganz langsamen Bewegung drin. Wer genau hinschaut, erkennt auf jeder Seite eine andere Szene aus unserem WG-Leben.\n\nHier sind sie alle einmal in voller Größe. Antippen zum Vergrößern, mit den Pfeiltasten durchblättern.",
+        "mood": "top",
+        "images": 5
+      },
+      "e-msbo4gu5-80kx24": {
+        "title": "Roof terrace redesign",
+        "createdAt": "2026-08-02T10:39:22.685Z",
+        "text": "Gemeinsam haben wir unsere Dachterrasse in eine gemütliche Wohlfühloase verwandelt – mit einer bequemen Couch und viel Grün für entspannte Stunden im Freien. 🌿☀️",
+        "mood": "top",
+        "images": 1
+      }
+    }
+  }
+}
