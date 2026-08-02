@@ -1,0 +1,55 @@
+/* Pull-to-Refresh (assets/js/pull-to-refresh.js) — eigenständige kleine Komponente.
+ * Ein einziges Element, das beim Ziehen mitwandert und beim Aktualisieren dreht. */
+
+/* Verhindert, dass Chrome/Android sein eigenes Pull-to-Refresh darüberlegt */
+html { overscroll-behavior-y: contain; }
+
+.ptr-indicator {
+  position: fixed;
+  top: calc(var(--nav-h) - 14px);
+  left: 50%;
+  z-index: 90;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--ink-soft);
+  background: rgba(22, 19, 26, 0.92);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transform: translate(-50%, 0);
+  opacity: 0;
+  pointer-events: none;
+}
+.ptr-indicator.is-settling {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+.ptr-indicator.is-ready {
+  color: var(--accent);
+  border-color: rgba(255, 158, 77, 0.7);
+}
+.ptr-arrow {
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 0.12s linear;
+}
+.ptr-indicator.is-refreshing {
+  color: var(--accent);
+  border-color: rgba(255, 158, 77, 0.7);
+  transition: transform 0.2s ease;
+}
+.ptr-indicator.is-refreshing .ptr-arrow {
+  transition: none;
+  animation: ptr-spin 0.75s linear infinite;
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ptr-indicator.is-refreshing .ptr-arrow { animation: none; }
+}
