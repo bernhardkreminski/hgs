@@ -97,6 +97,7 @@
     card.appendChild(el("p", {}, entry.description));
   }
   function renderBlogBody(card, entry) {
+    renderImageStrip(card, entry);
     const body = el("div", { class: "entry-body" });
     String(entry.text || "")
       .split(/\n{2,}/)
@@ -106,6 +107,98 @@
         body.appendChild(el("p", {}, trimmed));
       });
     card.appendChild(body);
+  }
+
+  /* ---------- Bilder: verkleinern, anzeigen, groß ansehen ---------- */
+  function imageList(entry) {
+    return Array.isArray(entry.images) ? entry.images.filter((i) => i && i.src) : [];
+  }
+
+  /* Vor dem Upload im Browser verkleinern — spart Platz und Ladezeit. */
+  function fileToResizedBase64(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("read-failed"));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error("decode-failed"));
+        img.onload = () => {
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          const scale = Math.min(1, maxDim / Math.max(w, h));
+          w = Math.max(1, Math.round(w * scale));
+          h = Math.max(1, Math.round(h * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", quality);
+          resolve(dataUrl.slice(dataUrl.indexOf(",") + 1));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* Vollbild-Ansicht mit Blättern über die Bilder eines Eintrags */
+  function openLightbox(images, startIndex) {
+    let i = startIndex || 0;
+    const backdrop = el("div", { class: "lightbox-backdrop" });
+    const figure = el("figure", { class: "lightbox-figure" });
+    const img = el("img", { class: "lightbox-img", alt: "" });
+    const caption = el("figcaption", { class: "lightbox-caption" });
+    figure.append(img, caption);
+
+    const closeBtn = el("button", { type: "button", class: "lightbox-close", "aria-label": "Schließen" }, "✕");
+    const prevBtn = el("button", { type: "button", class: "lightbox-nav prev", "aria-label": "Vorheriges Bild" }, "‹");
+    const nextBtn = el("button", { type: "button", class: "lightbox-nav next", "aria-label": "Nächstes Bild" }, "›");
+    const counter = el("span", { class: "lightbox-counter" });
+
+    function show() {
+      const cur = images[i];
+      img.src = cur.src;
+      img.alt = cur.caption || "Bild aus dem Blogeintrag";
+      caption.textContent = cur.caption || "";
+      caption.hidden = !cur.caption;
+      counter.textContent = images.length > 1 ? i + 1 + " / " + images.length : "";
+      prevBtn.hidden = images.length < 2;
+      nextBtn.hidden = images.length < 2;
+    }
+    function step(d) {
+      i = (i + d + images.length) % images.length;
+      show();
+    }
+    prevBtn.addEventListener("click", () => step(-1));
+    nextBtn.addEventListener("click", () => step(1));
+    closeBtn.addEventListener("click", () => dismissTop(backdrop));
+
+    function onKey(e) {
+      if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "ArrowRight") step(1);
+    }
+    document.addEventListener("keydown", onKey);
+
+    backdrop.append(closeBtn, prevBtn, figure, nextBtn, counter);
+    show();
+    pushModal(backdrop, () => document.removeEventListener("keydown", onKey));
+  }
+
+  function renderImageStrip(card, entry) {
+    const images = imageList(entry);
+    if (images.length === 0) return;
+    const strip = el("div", { class: "entry-images" + (images.length === 1 ? " single" : "") });
+    images.forEach((image, idx) => {
+      const btn = el("button", {
+        type: "button",
+        class: "entry-image",
+        "aria-label": (image.caption || "Bild") + " — in voller Größe ansehen",
+      });
+      btn.appendChild(el("img", { src: image.src, alt: image.caption || "", loading: "lazy" }));
+      btn.addEventListener("click", () => openLightbox(images, idx));
+      strip.appendChild(btn);
+    });
+    card.appendChild(strip);
   }
 
   /* ---------- card tag renderers (small badge next to the title) ---------- */
@@ -222,6 +315,13 @@
             { value: "top", label: "Top-Moment" },
             { value: "flop", label: "Naja-Moment" },
           ],
+        },
+        {
+          key: "images",
+          label: "Bilder",
+          type: "images",
+          required: false,
+          hint: "Optional. Werden vor dem Hochladen automatisch verkleinert.",
         },
       ],
       sort: sortByCreatedDesc,
@@ -424,6 +524,66 @@
         const inputId = "field-" + f.key;
         const label = el("label", { for: inputId }, f.label);
         let inputEl;
+        if (f.type === "images") {
+          /* Sonderfall: kein einfaches Wertfeld, sondern eine kleine Bildverwaltung.
+           * kept  = bereits gespeicherte Bilder, die bleiben sollen
+           * added = neu gewählte Dateien (werden erst beim Speichern hochgeladen) */
+          const kept = imageList(existingEntry || {}).slice();
+          const added = [];
+          const gallery = el("div", { class: "image-picker" });
+
+          function drawGallery() {
+            gallery.textContent = "";
+            kept.forEach((image, idx) => {
+              const item = el("div", { class: "image-chip" });
+              item.appendChild(el("img", { src: image.src, alt: image.caption || "" }));
+              const rm = el("button", { type: "button", class: "image-chip-remove", "aria-label": "Bild entfernen" }, "✕");
+              rm.addEventListener("click", () => {
+                kept.splice(idx, 1);
+                drawGallery();
+              });
+              item.appendChild(rm);
+              gallery.appendChild(item);
+            });
+            added.forEach((pending, idx) => {
+              const item = el("div", { class: "image-chip pending" });
+              item.appendChild(el("img", { src: "data:image/jpeg;base64," + pending.base64, alt: "" }));
+              const rm = el("button", { type: "button", class: "image-chip-remove", "aria-label": "Bild entfernen" }, "✕");
+              rm.addEventListener("click", () => {
+                added.splice(idx, 1);
+                drawGallery();
+              });
+              item.append(rm, el("span", { class: "image-chip-flag" }, "neu"));
+              gallery.appendChild(item);
+            });
+          }
+
+          const picker = el("input", { class: "image-input", id: inputId, type: "file", accept: "image/*", multiple: true });
+          const status = el("p", { class: "hint" });
+          picker.addEventListener("change", async () => {
+            const files = Array.from(picker.files || []);
+            picker.value = "";
+            for (const file of files) {
+              status.textContent = "Bild wird vorbereitet…";
+              try {
+                added.push({ base64: await fileToResizedBase64(file, 1600, 0.82) });
+              } catch (_) {
+                status.textContent = "Ein Bild konnte nicht gelesen werden.";
+              }
+              drawGallery();
+            }
+            status.textContent = "";
+          });
+
+          drawGallery();
+          wrap.append(label, gallery, picker, status);
+          if (f.hint) wrap.append(el("p", { class: "hint" }, f.hint));
+          const errorEl = el("p", { class: "field-error", hidden: true });
+          wrap.append(errorEl);
+          form.appendChild(wrap);
+          controls[f.key] = { imagesField: true, kept, added, errorEl };
+          return;
+        }
         if (f.type === "textarea") {
           inputEl = el("textarea", { class: "input", id: inputId, rows: "3" });
         } else if (f.type === "select") {
@@ -472,7 +632,13 @@
         let firstInvalid = null;
         const data = {};
         config.fields.forEach((f) => {
-          const { inputEl, errorEl } = controls[f.key];
+          const ctrl = controls[f.key];
+          if (ctrl.imagesField) {
+            data[f.key] = ctrl.kept.slice();
+            data._pendingImages = ctrl.added.slice();
+            return;
+          }
+          const { inputEl, errorEl } = ctrl;
           const rawVal = inputEl.value;
           const errMsg = validateField(f, rawVal);
           if (errMsg) {
@@ -503,8 +669,9 @@
    * WG code modal always opens — even if a valid code is cached from a prior
    * add/edit in this session. On success the code is still cached for later
    * add/edit calls. */
-  async function saveEntries(nextEntries, successMsg, options) {
-    const forceCode = !!(options && options.forceCode);
+  /* Gültigen Code besorgen — aus der Session oder per Modal.
+   * Gibt null zurück, wenn abgebrochen wurde. */
+  async function ensureCode(forceCode) {
     let code = forceCode ? null : sessionStorage.getItem("hgs-code");
     if (code) {
       let stillValid = false;
@@ -520,6 +687,16 @@
     }
     if (!code) {
       code = await openCodeModal();
+      if (code === null) return null;
+    }
+    return code;
+  }
+
+  async function saveEntries(nextEntries, successMsg, options) {
+    const forceCode = !!(options && options.forceCode);
+    let code = (options && options.code) || null;
+    if (!code) {
+      code = await ensureCode(forceCode);
       if (code === null) return false; /* user cancelled */
     }
     try {
@@ -532,11 +709,39 @@
     } catch (err) {
       if (err && err.message === "bad-code") {
         sessionStorage.removeItem("hgs-code");
-        return saveEntries(nextEntries, successMsg, options); /* reprompt */
+        /* den mitgegebenen Code verwerfen, sonst würde erneut derselbe versucht */
+        const retryOpts = Object.assign({}, options, { code: null });
+        return saveEntries(nextEntries, successMsg, retryOpts); /* reprompt */
       }
       showToast("Speichern fehlgeschlagen…", true);
       return false;
     }
+  }
+
+  /* Neu gewählte Bilder hochladen und an die behaltenen anhängen.
+   * Gibt null zurück, wenn abgebrochen wurde oder etwas schiefging. */
+  async function resolveImages(data) {
+    const pending = data._pendingImages || [];
+    delete data._pendingImages;
+    if (pending.length === 0) return { data, code: null };
+
+    const code = await ensureCode(false);
+    if (code === null) return null;
+
+    showToast(pending.length === 1 ? "Bild wird hochgeladen…" : "Bilder werden hochgeladen…");
+    const uploaded = [];
+    for (let n = 0; n < pending.length; n++) {
+      const name = HGSStore.newId() + "-" + (n + 1) + ".jpg";
+      try {
+        uploaded.push({ src: await HGSStore.uploadImage(name, pending[n].base64, code) });
+      } catch (err) {
+        if (err && err.message === "bad-code") sessionStorage.removeItem("hgs-code");
+        showToast("Bild-Upload fehlgeschlagen…", true);
+        return null;
+      }
+    }
+    data.images = (data.images || []).concat(uploaded);
+    return { data, code };
   }
 
   /* ---------- rendering: list rows (movies) ----------
@@ -637,9 +842,11 @@
     editBtn.addEventListener("click", async () => {
       const data = await openEntryModal("edit", entry);
       if (!data) return;
-      const updated = Object.assign({}, entry, data);
+      const resolved = await resolveImages(data);
+      if (!resolved) return;
+      const updated = Object.assign({}, entry, resolved.data);
       const next = entries.map((e) => (e.id === entry.id ? updated : e));
-      await saveEntries(next, config.toastEdit);
+      await saveEntries(next, config.toastEdit, { code: resolved.code });
     });
     deleteBtn.addEventListener("click", async () => {
       const confirmed = await openConfirmModal(entry.title);
@@ -674,9 +881,11 @@
     editBtn.addEventListener("click", async () => {
       const data = await openEntryModal("edit", entry);
       if (!data) return;
-      const updated = Object.assign({}, entry, data);
+      const resolved = await resolveImages(data);
+      if (!resolved) return;
+      const updated = Object.assign({}, entry, resolved.data);
       const next = entries.map((e) => (e.id === entry.id ? updated : e));
-      await saveEntries(next, config.toastEdit);
+      await saveEntries(next, config.toastEdit, { code: resolved.code });
     });
     deleteBtn.addEventListener("click", async () => {
       const confirmed = await openConfirmModal(entry.title);
@@ -755,8 +964,10 @@
       addBtn.addEventListener("click", async () => {
         const data = await openEntryModal("add");
         if (!data) return;
-        const entry = Object.assign({ id: HGSStore.newId(), createdAt: new Date().toISOString() }, data);
-        await saveEntries(entries.concat(entry), config.toastAdd);
+        const resolved = await resolveImages(data);
+        if (!resolved) return;
+        const entry = Object.assign({ id: HGSStore.newId(), createdAt: new Date().toISOString() }, resolved.data);
+        await saveEntries(entries.concat(entry), config.toastAdd, { code: resolved.code });
       });
     }
 

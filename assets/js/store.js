@@ -102,6 +102,26 @@
       if (res.status === 409) res = await putOnce(); /* sha veraltet (paralleler Write) — einmal neu versuchen */
       if (!res.ok) throw new Error("save-failed");
     },
+    /* Bild als eigene Datei nach hgs-data/images/ legen und die Roh-URL zurückgeben.
+     * Dateinamen sind eindeutig, deshalb reicht das CDN hier völlig aus. */
+    async uploadImage(name, base64, code) {
+      const g = CFG.github;
+      let token;
+      try {
+        token = await decryptToken(code);
+      } catch (_) {
+        throw new Error("bad-code");
+      }
+      const path = "images/" + name;
+      const api = "https://api.github.com/repos/" + g.owner + "/" + g.repo + "/contents/" + path;
+      const res = await fetch(api, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token, Accept: "application/vnd.github+json" },
+        body: JSON.stringify({ message: "blog: Bild " + name, content: base64, branch: g.branch }),
+      });
+      if (!res.ok) throw new Error("upload-failed");
+      return "https://raw.githubusercontent.com/" + g.owner + "/" + g.repo + "/" + g.branch + "/" + path;
+    },
   };
 
   window.HGSStore = {
@@ -115,6 +135,12 @@
       } else {
         await localBackend.save(kind, entries);
       }
+    },
+    /* base64 (ohne data:-Präfix) hochladen, liefert die URL zum Anzeigen */
+    async uploadImage(name, base64, code) {
+      if (!(await verifyCode(code))) throw new Error("bad-code");
+      if (CFG.backend === "github") return githubBackend.uploadImage(name, base64, code);
+      return "data:image/jpeg;base64," + base64; /* lokaler Fallback */
     },
     verifyCode,
     newId() {

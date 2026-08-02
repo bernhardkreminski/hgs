@@ -66,7 +66,8 @@ Until crops exist, reference the final filenames anyway — the orchestrator gua
 ## Whiteboard data layer (`/assets/js/store.js` — use as-is)
 `HGSStore.load(kind)` / `HGSStore.save(kind, entries, code)` / `HGSStore.verifyCode(code)` / `HGSStore.newId()` — kinds now: `'movies' | 'workshops' | 'blog'`.
 Shared storage is LIVE (backend `github`, repo `hgs-data`). Reads are public; every write needs the WG code (modal; cache in `sessionStorage['hgs-code']`).
-Entry shapes — movies: `{id, title, description?, url?, createdAt, watched?, watchedAt?}` (**description OPTIONAL**; `watched` bool + `watchedAt` "YYYY-MM-DD" set via the list checkbox) · workshops: `{id, title, description, host, date?, createdAt}` · blog: `{id, title, text, mood: 'top'|'flop', createdAt}`.
+Entry shapes — movies: `{id, title, description?, url?, createdAt, watched?, watchedAt?}` (**description OPTIONAL**; `watched` bool + `watchedAt` "YYYY-MM-DD" set via the list checkbox) · workshops: `{id, title, description, host, date?, createdAt}` · blog: `{id, title, text, mood: 'top'|'flop', images?: [{src, caption?}], createdAt}`.
+Blog-Bilder: im Formular auswählbar (`type: "images"`), werden im Browser auf max. 1600px/JPEG q0.82 verkleinert und über `HGSStore.uploadImage(name, base64, code)` als eigene Datei nach `hgs-data/images/` geschrieben; im Eintrag steht nur die URL. Klick auf ein Bild öffnet die Vollbild-Ansicht (Pfeiltasten blättern, Esc schließt). `src` darf auch ein seiteneigener Pfad sein (`/assets/img/…`).
 Movies render as a checkable LIST (`listMode`/`watchable` in board.js), not a card grid: checkbox = "gesehen", checking opens an inline "Wann geschaut?" date field; every state change goes through the same code gate. /filme/ also has a TMDB-based recommendations section (`assets/js/recommendations.js`, see RECOMMENDATIONS_PLAN.md — API key injected at deploy time via `.github/workflows/pages.yml`, never committed).
 
 ## Board-page photo backgrounds (round 3)

@@ -1,9 +1,38 @@
 [
   {
-    "id": "b-seed-1",
-    "title": "Die Website ist live!",
-    "text": "HGS hat jetzt ein Zuhause im Internet. Gebaut an einem Nachmittag, gehostet überm Dach der Stadt — ab jetzt werden hier große und kleine Momente festgehalten.",
+    "id": "e-ms1vyg1k-ws95qe",
+    "createdAt": "2026-07-26T14:20:56.888Z",
+    "title": "Löwen WG Party",
+    "text": "Gestern war Löwen WG Party 🎉\nDas war toll, viel lustige Leute waren da.\nNur die Musik war grottig\nHGS: \"Heute gute Stimmung\"",
+    "mood": "flop"
+  },
+  {
+    "id": "b-hintergruende",
+    "title": "Die Bilder hinter der Website",
+    "text": "Jede Seite hier hat ihr eigenes Bild im Hintergrund — schön abgedunkelt, damit die Texte lesbar bleiben, und mit einer ganz langsamen Bewegung drin. Wer genau hinschaut, erkennt auf jeder Seite eine andere Szene aus unserem WG-Leben.\n\nHier sind sie alle einmal in voller Größe. Antippen zum Vergrößern, mit den Pfeiltasten durchblättern.",
     "mood": "top",
-    "createdAt": "2026-07-26T14:30:00.000Z"
+    "images": [
+      {
+        "src": "/assets/img/group.jpg",
+        "caption": "Startseite — wir sieben auf dem Blechdach, kurz bevor die Sonne weg war. Das Bild, mit dem alles angefangen hat."
+      },
+      {
+        "src": "/assets/img/bg-wg.jpg",
+        "caption": "Die WG — Gartenparty im Rosenheim Garden Peace: Wimpel, Lampions, Sonnenblumen und ein Tipi."
+      },
+      {
+        "src": "/assets/img/bg-filme.jpg",
+        "caption": "Filme — Heimkino-Abend auf dem Sofa, mit der größten Schüssel Popcorn, die die Küche hergibt."
+      },
+      {
+        "src": "/assets/img/bg-workshops.jpg",
+        "caption": "Workshops — der Basteltisch am Fenster: Kleber, Stifte, Washi-Tape und sieben Leute, die alle gleichzeitig etwas erklären."
+      },
+      {
+        "src": "/assets/img/bg-blog.jpg",
+        "caption": "Blog — Kick am Abend in Blau. Das Ergebnis stand 0:0, die Stimmung nicht."
+      }
+    ],
+    "createdAt": "2026-08-02T08:26:00.003834Z"
   }
 ]
