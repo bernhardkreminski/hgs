@@ -1,5 +1,19 @@
 # HGS — Design & Code Contract (v2 "Rebrush")
 
+> **Note for new readers.** This is the *binding visual and structural contract*
+> for the site — head snippet, nav, footer, tokens, components, conventions.
+> Follow it for any UI work. Two caveats:
+>
+> - The **"File ownership"** section at the bottom is historical: it split work
+>   between parallel agents during the original build. Ignore it unless you are
+>   again running several agents in parallel; there are no ownership rules today.
+> - The **Photos** section names `group.png` / `portraits.png`; those source
+>   files were cropped and removed. The live assets are `group.jpg`, `bg-*.jpg`
+>   and `p-*.jpg` — see [FEATURES.md](FEATURES.md) for the current list.
+>
+> For everything else — architecture, features, data, deployment — start at
+> [README.md](README.md).
+
 Static site on GitHub Pages, served at the domain root (`https://hgs.house/`, CNAME committed). **Vanilla HTML/CSS/JS only, no frameworks, no build tools. All URLs are clean directory URLs — never expose `.html`:** pages live at `/` (index.html), `/wg/`, `/filme/`, `/workshops/`, `/blog/` (each `<dir>/index.html`). **All asset/link paths are root-absolute** (`/assets/css/base.css`, `/filme/`, …).
 
 ## Art direction (reference: hirschroast.com)

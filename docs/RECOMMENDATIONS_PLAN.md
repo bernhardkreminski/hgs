@@ -1,5 +1,16 @@
 # Movie recommendations for /filme/ — implementation plan & handoff
 
+> **STATUS: shipped and live.** This document is kept as the *design rationale*
+> for the recommendation feature — why TMDB rather than embeddings, and why the
+> API key is injected at deploy time. The checklist near the bottom is
+> **historical**: the code was committed, the Pages source was switched to
+> GitHub Actions, the `TMDB_API_KEY` secret exists, and the block renders live.
+> Do not act on those unchecked boxes.
+>
+> One behavioural change since this was written: recommendations are seeded from
+> **watched entries only**, not the whole list, and the cache key is
+> `hgs:reco:seen:<titles>`. See [FEATURES.md](FEATURES.md).
+
 ## Goal
 Suggest new movies to watch, based on the WG's shared movie list
 (`data/movies.json`, mirrored live at github.com/bernhardkreminski/hgs-data).
@@ -29,17 +40,17 @@ building one from scratch:
    linking out to a JustWatch search per movie.
 
 ## Files (already implemented in this session)
-- [assets/js/recommendations.js](assets/js/recommendations.js) — all of the
+- [assets/js/recommendations.js](../assets/js/recommendations.js) — all of the
   logic above. Self-contained IIFE, no dependency on board.js except reading
   the same `HGSStore.load("movies")` data layer.
-- [assets/js/config.js](assets/js/config.js) — added a `tmdb.apiKey` slot
+- [assets/js/config.js](../assets/js/config.js) — added a `tmdb.apiKey` slot
   (currently `""` in git — see "Secret handling" below).
-- [filme/index.html](filme/index.html) — added `#reco-section` /
+- [filme/index.html](../filme/index.html) — added `#reco-section` /
   `#reco-status` / `#reco-grid`, plus a `<script src="/assets/js/
   recommendations.js">` tag after board.js.
-- [assets/css/board.css](assets/css/board.css) — added `.reco-*` rules
+- [assets/css/board.css](../assets/css/board.css) — added `.reco-*` rules
   (poster aspect-ratio cards, reusing the existing `.card` glass style).
-- [.github/workflows/pages.yml](.github/workflows/pages.yml) — GitHub
+- [.github/workflows/pages.yml](../.github/workflows/pages.yml) — GitHub
   Actions workflow that builds+deploys Pages, injecting the TMDB key into a
   throwaway copy of `config.js` at deploy time only (see below).
 

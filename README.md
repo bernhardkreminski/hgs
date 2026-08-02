@@ -10,7 +10,8 @@ The website of our shared flat — live at **[hgs.house](https://hgs.house/)**.
 | WG | `/wg/` | Who lives here — portraits & bios |
 | Filme | `/filme/` | Shared watchlist (movies we still need to watch) |
 | Workshops | `/workshops/` | Who teaches whom what |
-| Blog | `/blog/` | Great (and not so great) moments |
+| Blog | `/blog/` | Great (and not so great) moments, with photos |
+| Album | `/chebter-one/` | Hidden player for our own album — find it on the WG page |
 
 ## Shared boards
 
@@ -35,4 +36,9 @@ python3 -m http.server 8000
 ```
 
 Note: pages use root-absolute paths (`/assets/…`), so serve from the repo root.
-Design system & conventions: see [`DESIGN.md`](DESIGN.md).
+
+## Documentation
+
+Full documentation lives in [`docs/`](docs/README.md) — architecture, every
+feature, the data store, deployment, security and the traps worth knowing.
+**Start at [`docs/README.md`](docs/README.md).**
