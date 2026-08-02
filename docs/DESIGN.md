@@ -27,7 +27,7 @@ needed to reach any subpage — the fixed `.site-nav` guarantees that).
 
 ## Design tokens & components (`/assets/css/base.css` — DO NOT modify, only use)
 - Colors: `--bg #0e0c10`, `--bg-soft`, `--card`, `--ink #f2efe9`, `--ink-soft`, `--accent #ff9e4d` (sparingly!), `--line`
-- Type: `--font-display` Archivo (800/900, tight tracking), `--font-body` Inter
+- Type: `--font-display` Archivo (800/900, tight tracking), `--font-body` Inter — **selbst ausgeliefert** aus `/assets/fonts/` (variable woff2, `@font-face` steht in base.css). Keine Google-Fonts-Links im Head, bitte auch nicht wieder einbauen.
 - Components: `.site-nav` (fixed; add class `solid` on subpages + `has-solid-nav` on `<body>`), `.panel` + `.panel-media` + `.panel-scrim` + `.on-photo`, `.statement` (+ `.end`), `.subline`, `.scroll-hint`, `.eyebrow`, `.section`, `.section-title`, `.section-sub`, `.card`, `.grid`, `.tag`/`.tag.alt`, `.btn`/`.btn-primary`/`.btn-ghost`/`.btn-danger`, `.field`+`.input`, `.modal-backdrop`/`.modal-card`/`.modal-actions`, `.toast`, `.site-footer`
 
 ## Head snippet (every page; adjust `<title>`)
@@ -35,9 +35,6 @@ needed to reach any subpage — the fixed `.site-nav` guarantees that).
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>… · HGS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/css/base.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">

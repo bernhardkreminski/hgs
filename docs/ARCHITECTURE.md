@@ -3,11 +3,13 @@
 ## Stack
 
 Static HTML/CSS/JS served by GitHub Pages. No framework, no build step, no npm.
-Two external runtime dependencies, both optional-by-design:
+Exactly one external runtime dependency:
 
-- **Google Fonts** (Archivo + Inter) — a `<link>` in every head
 - **TMDB API** — only for the recommendations block on `/filme/`; without a key
   that block hides itself and everything else works
+
+Fonts are **self-hosted** (`/assets/fonts/`), so a normal page load talks to
+nobody but GitHub Pages.
 
 ## Repo map
 
@@ -24,6 +26,7 @@ Two external runtime dependencies, both optional-by-design:
 ├─ assets/
 │  ├─ css/  base.css · home.css · board.css · album.css · pull-refresh.css · legal.css
 │  ├─ js/   config.js · store.js · board.js · recommendations.js · album.js · pull-to-refresh.js
+│  ├─ fonts/ archivo-*.woff2 · inter-*.woff2  (variable, latin + latin-ext)
 │  ├─ img/  bg-*.jpg (page backgrounds) · p-*.jpg (portraits) · group.jpg · wg-art.svg
 │  └─ audio/ 01.mp3 … 10.mp3  (the album, ~45 MB total)
 ├─ data/                seed JSON, only used by the 'local' backend fallback

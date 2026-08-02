@@ -358,9 +358,10 @@ and use the same operator details — HGS *is* Heilig-Geist-Straße.
 
 What differs from rosencri.me's versions, and matters if you edit them:
 
-- **Google Fonts are disclosed.** This site loads Archivo and Inter from
-  `fonts.googleapis.com`, so §3 of the privacy policy says so plainly. Should
-  the fonts ever be self-hosted, delete that section.
+- **No third-party requests to disclose.** Archivo and Inter are served from
+  `/assets/fonts/`, so §2 can state plainly that nothing is loaded from Google.
+  (The policy briefly had a Google Fonts section; it was deleted the moment the
+  fonts moved in-house. Re-add it if a `<link>` to any CDN ever comes back.)
 - **Entries live in a public GitHub repo**, and git history keeps deleted ones.
   The warning box in §4 says that outright — it's the one paragraph a flatmate
   should actually read before typing someone's phone number into a blog post.
