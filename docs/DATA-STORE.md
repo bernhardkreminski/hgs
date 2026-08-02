@@ -41,6 +41,7 @@ flip to `"local"` in your working copy (and don't commit that).
   "title": "Die Nackte Kanone", // required
   "description": "…",           // OPTIONAL
   "url": "https://www.justwatch.com/…", // optional; only http(s) is rendered
+  "tags": ["Zum Lachen", "WG-Kino"],    // optional; moods from a fixed list + own tags
   "watched": true,              // set by the row checkbox
   "watchedAt": "2026-05-22",    // YYYY-MM-DD, local date
   "createdAt": "2026-07-26T12:00:00.000Z"
@@ -68,6 +69,12 @@ flip to `"local"` in your working copy (and don't commit that).
 
 Unknown fields are preserved on edit (`Object.assign({}, entry, data)`), so
 adding a field to the schema won't silently drop data on the next save.
+
+**Tags** are plain strings. The mood tags come from `MOOD_TAGS` in `board.js` —
+the emoji lives there, never in the data, so renaming an emoji doesn't rewrite
+entries. Own tags are free text (max 24 chars, de-duplicated case-insensitively).
+Entries written before this field simply have no `tags` key; everything treats
+that as an empty list.
 
 ## API
 

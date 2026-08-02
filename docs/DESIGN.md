@@ -80,8 +80,9 @@ Until crops exist, reference the final filenames anyway — the orchestrator gua
 ## Whiteboard data layer (`/assets/js/store.js` — use as-is)
 `HGSStore.load(kind)` / `HGSStore.save(kind, entries, code)` / `HGSStore.verifyCode(code)` / `HGSStore.newId()` — kinds now: `'movies' | 'workshops' | 'blog'`.
 Shared storage is LIVE (backend `github`, repo `hgs-data`). Reads are public; every write needs the WG code (modal; cache in `sessionStorage['hgs-code']`).
-Entry shapes — movies: `{id, title, description?, url?, createdAt, watched?, watchedAt?}` (**description OPTIONAL**; `watched` bool + `watchedAt` "YYYY-MM-DD" set via the list checkbox) · workshops: `{id, title, description, host, date?, createdAt}` · blog: `{id, title, text, mood: 'top'|'flop', images?: [{src, caption?}], createdAt}`.
+Entry shapes — movies: `{id, title, description?, url?, tags?: string[], createdAt, watched?, watchedAt?}` (**description OPTIONAL**; `watched` bool + `watchedAt` "YYYY-MM-DD" set via die Listen-Checkbox; `tags` = feste Stimmungen aus `MOOD_TAGS` + eigene Tags, Emoji nur in der Anzeige) · workshops: `{id, title, description, host, date?, createdAt}` · blog: `{id, title, text, mood: 'top'|'flop', images?: [{src, caption?}], createdAt}`.
 Blog-Bilder: im Formular auswählbar (`type: "images"`), werden im Browser auf max. 1600px/JPEG q0.82 verkleinert und über `HGSStore.uploadImage(name, base64, code)` als eigene Datei nach `hgs-data/images/` geschrieben; im Eintrag steht nur die URL. Klick auf ein Bild öffnet die Vollbild-Ansicht (Pfeiltasten blättern, Esc schließt). `src` darf auch ein seiteneigener Pfad sein (`/assets/img/…`).
+Filme tragen Tags (`taggable` in board.js): antippbare Stimmungs-Chips im Formular (`.tag-chip`), Tag-Chips am Eintrag (`.row-tag`, klickbar = filtern) und eine Filterleiste über der Liste (`#board-filters` / `.filter-chip`, Mehrfachauswahl = oder). Styles in `board.css`, Farbe nur über `--accent` — keine neuen Tokens.
 Movies render as a checkable LIST (`listMode`/`watchable` in board.js), not a card grid: checkbox = "gesehen", checking opens an inline "Wann geschaut?" date field; every state change goes through the same code gate. /filme/ also has a TMDB-based recommendations section (`assets/js/recommendations.js`, see RECOMMENDATIONS_PLAN.md — API key injected at deploy time via `.github/workflows/pages.yml`, never committed).
 
 ## Board-page photo backgrounds (round 3)
@@ -89,6 +90,9 @@ Movies render as a checkable LIST (`listMode`/`watchable` in board.js), not a ca
 
 ## Hidden album page (orchestrator-owned)
 `/chebter-one/` — full-screen player for the HGS-produced album "Chebter One (Remastered)" (tracks at `/assets/audio/01.mp3` … `10.mp3`). NOT in the main nav. Agent A links it subtly from Cheb's tile on /wg/.
+
+## Pull-to-Refresh (alle Seiten außer `/chebter-one/`)
+`<link rel="stylesheet" href="/assets/css/pull-refresh.css">` im Head, `<script src="/assets/js/pull-to-refresh.js"></script>` **vor** `board.js`. Neue Seiten bitte genauso einbinden. Die Anzeige ist ein einzelnes rundes Element unter der Nav (`.ptr-indicator`), orange erst ab der Auslöseschwelle. Eigene Aktualisierung anmelden statt Seite neu laden: `window.HGSRefresh.register(async () => { … })`.
 
 ## Delete security
 Delete must ALWAYS ask for the WG code — the sessionStorage code cache applies to add/edit only.

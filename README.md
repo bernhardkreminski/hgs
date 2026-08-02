@@ -8,7 +8,7 @@ The website of our shared flat — live at **[hgs.house](https://hgs.house/)**.
 |---|---|---|
 | Home | `/` | Full-screen rooftop hero, quick links to everything |
 | WG | `/wg/` | Who lives here — portraits & bios |
-| Filme | `/filme/` | Shared watchlist (movies we still need to watch) |
+| Filme | `/filme/` | Shared watchlist, taggable by mood and filterable |
 | Workshops | `/workshops/` | Who teaches whom what |
 | Blog | `/blog/` | Great (and not so great) moments, with photos |
 | Album | `/chebter-one/` | Hidden player for our own album — find it on the WG page |
@@ -25,6 +25,18 @@ access code (PBKDF2 + AES-GCM) in `assets/js/config.js` and only has write acces
 restore it anytime.
 
 Switch storage backend: `assets/js/config.js` → `backend: "github" | "local"`.
+
+On a phone, **pull down** at the top of a page to fetch the latest entries.
+
+## Daily digest
+
+A GitHub Action mails a summary every morning at **09:00** — everything added,
+edited or deleted on the boards since the last one. Nothing happened, no mail.
+Same mechanism as the sibling project rosencri.me: poll, diff against a
+committed snapshot, send through our own SMTP client — no third-party mail
+action, no npm install. The recipient address and the SMTP login live in
+repository secrets, never in the repo; setup is in
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Development
 

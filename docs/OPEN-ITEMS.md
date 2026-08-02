@@ -26,6 +26,28 @@ Notes for whoever picks it up:
 - Ask whether it should also appear *on* the site (e.g. a small print-friendly
   block) or just be a file to share — the original request was ambiguous.
 
+### Instant mail on every change — **not done, by design of where the code can live**
+
+The request was "mail me when something is added or edited", delivered as "one
+update in the morning". The morning digest does that (see
+[FEATURES.md](FEATURES.md) §12). A mail *within seconds of each edit* is not
+possible from this repo: the writes land in **`hgs-data`**, and only a workflow
+**in that repo** sees them.
+
+If it's wanted later, the shape is small:
+
+- Add `.github/workflows/notify-on-push.yml` to `hgs-data`, triggered on
+  `push: paths: ["*.json"]`, running the same two scripts (copy them over, or
+  fire a `repository_dispatch` back to `hgs` so the formatting stays here).
+- The mail secrets have to be created in `hgs-data` as well — secrets are
+  per-repo.
+- Expect several mails per session: every checkbox tick is its own commit. That
+  noisiness is the reason the digest is the better default.
+
+A middle ground needs no second repo at all: keep the workflow here, drop
+`NOTIFY_DIGEST_HOUR` from `notify.yml` and set the cron to `*/30 * * * *`. Half
+an hour late, one mail per burst, and nothing else changes.
+
 ## Known trade-offs (deliberate, revisit if priorities change)
 
 - **The board access code is not real security.** The write token is recoverable

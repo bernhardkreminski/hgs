@@ -20,13 +20,17 @@ Two external runtime dependencies, both optional-by-design:
 ├─ blog/index.html      blog board
 ├─ chebter-one/index.html  hidden album player
 ├─ assets/
-│  ├─ css/  base.css · home.css · board.css · album.css
-│  ├─ js/   config.js · store.js · board.js · recommendations.js · album.js
+│  ├─ css/  base.css · home.css · board.css · album.css · pull-refresh.css
+│  ├─ js/   config.js · store.js · board.js · recommendations.js · album.js · pull-to-refresh.js
 │  ├─ img/  bg-*.jpg (page backgrounds) · p-*.jpg (portraits) · group.jpg · wg-art.svg
 │  └─ audio/ 01.mp3 … 10.mp3  (the album, ~45 MB total)
 ├─ data/                seed JSON, only used by the 'local' backend fallback
 ├─ docs/                you are here
-├─ .github/workflows/pages.yml   build + deploy
+├─ .github/workflows/pages.yml         build + deploy
+├─ .github/workflows/notify.yml        morning email digest (cron)
+├─ .github/scripts/notify-changes.mjs  diffs hgs-data against the snapshot, mails
+├─ .github/scripts/smtp.mjs            dependency-free SMTP client (from rosencri.me)
+├─ .github/notify-state.json           last seen board snapshot, written by the workflow
 ├─ CNAME                hgs.house
 ├─ favicon.svg · favicon-32.png · apple-touch-icon.png · icon-192.png · icon-512.png
 └─ site.webmanifest
@@ -44,6 +48,7 @@ Every page loads `base.css` first, then exactly one page stylesheet.
 | `home.css` | `/`, `/wg/` | Landing hero/panel, WG portrait tiles + hover overlay, group photo frame, WG page background |
 | `board.css` | `/filme/`, `/workshops/`, `/blog/` | Board headers, card treatment, movie list rows, image strip + lightbox, image picker, page backgrounds |
 | `album.css` | `/chebter-one/` | Vinyl, tracklist, player bar, fullscreen listen mode |
+| `pull-refresh.css` | all pages except `/chebter-one/` | The pull-to-refresh indicator, plus `overscroll-behavior-y: contain` on `html` so Chrome's own pull-to-refresh stays out of the way |
 
 ## JS modules
 
@@ -53,6 +58,7 @@ Loaded as plain `<script>` tags at end of `<body>`, in this order on board pages
 <script src="/assets/js/config.js"></script>
 <script src="/assets/js/store.js"></script>
 <script>window.HGS_BOARD = { kind: "movies" };</script>
+<script src="/assets/js/pull-to-refresh.js"></script>  <!-- before board.js: it registers a handler -->
 <script src="/assets/js/board.js"></script>
 <script src="/assets/js/recommendations.js"></script>  <!-- /filme/ only -->
 ```
@@ -97,7 +103,10 @@ Key internals (function names are stable; line numbers drift):
 | Code gate | `openCodeModal`, `ensureCode(forceCode)` |
 | Writing | `saveEntries(next, msg, {forceCode, code})` |
 | Images | `fileToResizedBase64`, `resolveImages`, `renderImageStrip`, `openLightbox` |
+| Tags | `MOOD_TAGS`, `tagList`, `tagLabel`, `compareTags` (moods first, own tags alphabetically) |
+| Filtering | `matchesFilter`, `toggleFilter`, `renderFilters`, `renderEntryTags` — movies only (`taggable: true`) |
 | Rendering | `createCard` (workshops/blog), `createRow` (movies list), `renderGrid` |
+| Reloading | `reloadEntries(force)` — used by focus/visibility **and** pull-to-refresh |
 
 ### `recommendations.js` (224 lines)
 
@@ -105,6 +114,20 @@ Self-contained. Reads the movie list via `HGSStore.load("movies")`, keeps only
 **watched** entries as seeds, asks TMDB for similar films, aggregates and
 renders. Hides itself entirely if `tmdb.apiKey` is empty. See
 [FEATURES.md](FEATURES.md).
+
+### `pull-to-refresh.js` → `window.HGSRefresh` (~170 lines)
+
+Touch-only pull-to-refresh, loaded on every page except the album player. Exposes:
+
+```js
+HGSRefresh.register(fn)  // page supplies its own refresh (board.js does)
+HGSRefresh.run()         // trigger without a gesture; works on desktop too
+```
+
+Without a registered handler the gesture just calls `location.reload()`. The
+gesture listeners are only attached on touch devices; the API exists everywhere.
+Pulling is ignored unless the page is scrolled to the top, and while a modal,
+the lightbox or an inline date field is open.
 
 ### `album.js` (160 lines)
 
@@ -123,6 +146,8 @@ array at the top of the file; files are `assets/audio/NN.mp3`.
    - registers a focus/visibility listener that reloads when the tab is
      re-focused (throttled 10 s, skipped while a modal or inline date field is
      open) so entries added on another device appear
+   - registers the same reload with `HGSRefresh` (bypassing the throttle) so
+     pulling down fetches immediately and confirms with a toast
 
 ## Data flow for a write
 

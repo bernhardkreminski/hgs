@@ -36,6 +36,90 @@ real value.
 - Rotate at themoviedb.org → Settings → API, then update the repo secret. No code
   change needed.
 
+## The morning digest (`notify.yml`)
+
+A second workflow, unrelated to deploying: every morning at 09:00 it mails what
+changed on the boards. See [FEATURES.md](FEATURES.md) §12 for the mechanism.
+
+### Secrets it needs
+
+Four, plus two optional ones. Nothing about the mail lives in the repo — the
+recipient address least of all.
+
+| Secret | Required | Value |
+|---|---|---|
+| `NOTIFY_TO` | yes | where the mail goes |
+| `SMTP_HOST` | yes | e.g. `smtp.gmail.com` |
+| `SMTP_USER` | yes | the mailbox to send **from** |
+| `SMTP_PASS` | yes | an **app password**, never the account password |
+| `SMTP_PORT` | no | `465` (default, implicit TLS) or `587` (STARTTLS) |
+| `SMTP_FROM` | no | defaults to `SMTP_USER` |
+
+With [the GitHub CLI](https://cli.github.com/):
+
+```bash
+gh secret set NOTIFY_TO -R bernhardkreminski/hgs
+gh secret set SMTP_HOST -R bernhardkreminski/hgs --body "smtp.gmail.com"
+gh secret set SMTP_USER -R bernhardkreminski/hgs
+gh secret set SMTP_PASS -R bernhardkreminski/hgs
+```
+
+Omitting `--body` prompts for the value instead of putting it in your shell
+history — worth doing for all but the host, since the recipient address is the
+one thing this feature exists to keep out of the repo. The web UI does the same
+job: **Settings → Secrets and variables → Actions → New repository secret**.
+
+Note that managing secrets needs a token with the **Secrets: write** permission
+on the repo — a fine-grained PAT without it fails with `HTTP 403: Resource not
+accessible by personal access token`, the same class of trap as the push
+problem below.
+
+**Gmail:** account passwords are rejected over SMTP. With 2-step verification
+on, create an app password at <https://myaccount.google.com/apppasswords> and
+use it as `SMTP_PASS`; `SMTP_USER` is the full address, host `smtp.gmail.com`,
+port 465. `SMTP_FROM` must be that same address or a verified alias — Gmail
+rewrites or refuses anything else. A `+tag` address (`…+hgs@gmail.com`) as
+`NOTIFY_TO` is fine and makes the digest trivially filterable.
+
+Any provider works — the client speaks plain SMTP submission on 465 or 587.
+There is no unencrypted path: a server offering neither is refused rather than
+sent a password in the clear.
+
+### Trying it out
+
+**Actions → Notify on board changes → Run workflow**, with *dry run* ticked: the
+mail is printed to the job log instead of sent, and the snapshot is left alone
+so the next real run still reports the same changes. Then run it again without
+dry run for a real mail.
+
+```bash
+gh workflow run notify.yml -R bernhardkreminski/hgs -f dry_run=true
+gh run watch -R bernhardkreminski/hgs
+```
+
+Locally, touching nothing that is committed:
+
+```bash
+NOTIFY_DRY_RUN=1 NOTIFY_DUMP_HTML=/tmp/mail.html \
+NOTIFY_STATE_PATH=/tmp/state.json node .github/scripts/notify-changes.mjs
+```
+
+Notes worth knowing:
+
+- The **first run after setup sends nothing** — it records the baseline. That is
+  expected, not a failure.
+- The workflow **commits** `.github/notify-state.json` back to `main`, so it
+  needs `contents: write`. The commit carries `[skip ci]` so it doesn't trigger
+  a Pages deploy.
+- That state file ships with the site (`path: .` uploads the whole repo), so
+  treat it as public. It contains only board content that is public anyway.
+- The job reads the **data** repo, `hgs-data`. It is public, so this works even
+  though `GITHUB_TOKEN` is scoped to `hgs`; the token only raises the API rate
+  limit, and the script retries anonymously if it is rejected.
+- GitHub disables scheduled workflows in repos with no activity for 60 days.
+- `scripts/smtp.mjs` is a copy of the file of the same name in **rosencri.me**.
+  Fix a bug in one, copy it to the other.
+
 ## Verifying a deploy
 
 ```bash

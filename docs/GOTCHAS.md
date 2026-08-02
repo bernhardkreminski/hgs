@@ -35,6 +35,32 @@ actual asset with a cache-buster.
 **Use the TMDB *v3 API key*, not the v4 read token.** The v4 JWT needs a Bearer
 header; the code sends `?api_key=` and will just fail quietly.
 
+**The morning digest reads `hgs-data`, not this repo.** "nothing changed" in the
+`notify` run usually means it really was quiet — check
+`gh api "repos/bernhardkreminski/hgs-data/commits?per_page=5"` before suspecting
+the script. Missing mail secrets are a logged **skip**, not a failure.
+
+**The first digest run after setup sends nothing.** It records the baseline
+snapshot; there is nothing to compare against yet. Same after
+`.github/notify-state.json` is deleted or its `version` changes.
+
+**A dry run does not consume the diff, a real run does.** Once the mail is away
+the snapshot is updated, so re-running reports nothing. To re-see a digest,
+revert the state file commit.
+
+**Scheduled workflows get disabled after 60 days without repo activity.** If the
+digest simply stops arriving, look there first — GitHub also mails a notice.
+
+## Front end
+
+**Pull-to-refresh must stay on a non-passive `touchmove` listener.** It calls
+`preventDefault()` to stop the browser's own rubber-band/refresh; with
+`{ passive: true }` that call is ignored and you get both gestures at once.
+
+**Movie tag emoji live in `MOOD_TAGS`, not in the data.** Entries store plain
+text like `"Zum Lachen"`. Renaming a mood therefore orphans the tag on existing
+entries (it stays, just without an emoji) — rename in the data too if it matters.
+
 ## Credentials
 
 **`gh api … --jq .permissions` showing `push: true` proves nothing** about
