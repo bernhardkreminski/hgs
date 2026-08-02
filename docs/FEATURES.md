@@ -345,3 +345,35 @@ that trace is the only practical way to see why a provider is unhappy.
 The state file is written **only after** the mail is accepted. That ordering is
 the whole failure design: a crash can produce a duplicate notification, never a
 missing one.
+
+---
+
+## 13. Impressum & Datenschutz
+
+**Files:** `impressum/index.html`, `datenschutz/index.html`, `legal.css`
+
+Ported from the sibling project rosencri.me and rewritten for what this site
+actually does. Both are `noindex, follow`, linked from the footer of every page,
+and use the same operator details — HGS *is* Heilig-Geist-Straße.
+
+What differs from rosencri.me's versions, and matters if you edit them:
+
+- **Google Fonts are disclosed.** This site loads Archivo and Inter from
+  `fonts.googleapis.com`, so §3 of the privacy policy says so plainly. Should
+  the fonts ever be self-hosted, delete that section.
+- **Entries live in a public GitHub repo**, and git history keeps deleted ones.
+  The warning box in §4 says that outright — it's the one paragraph a flatmate
+  should actually read before typing someone's phone number into a blog post.
+- **Writing needs the WG code**, so the "anyone can edit anything" wording of
+  the original does not apply. The Impressum says entries come from residents
+  and are not pre-checked.
+- **TMDB** gets its own section: `/filme/` sends film titles and the visitor's
+  IP to TMDB, and only that page does.
+- The **daily digest** is disclosed too, along with what it does *not* contain
+  (no IP addresses, no idea who typed what).
+
+Contact throughout is `kontakt@hgs.house`, forwarded to a private mailbox at the
+registrar, so no personal address appears on the site.
+
+`/chebter-one/` has no footer at all (it's a full-screen player); it stays
+unlinked from the footer pair and is reachable only from `/wg/`.

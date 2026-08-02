@@ -12,6 +12,8 @@ The website of our shared flat — live at **[hgs.house](https://hgs.house/)**.
 | Workshops | `/workshops/` | Who teaches whom what |
 | Blog | `/blog/` | Great (and not so great) moments, with photos |
 | Album | `/chebter-one/` | Hidden player for our own album — find it on the WG page |
+| Impressum | `/impressum/` | Legally required details, linked in every footer |
+| Datenschutz | `/datenschutz/` | What data the site touches, and what it doesn't |
 
 ## Shared boards
 

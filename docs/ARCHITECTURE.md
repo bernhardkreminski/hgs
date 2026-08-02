@@ -19,8 +19,10 @@ Two external runtime dependencies, both optional-by-design:
 ├─ workshops/index.html workshop board
 ├─ blog/index.html      blog board
 ├─ chebter-one/index.html  hidden album player
+├─ impressum/index.html    Impressum (noindex)
+├─ datenschutz/index.html  Datenschutzerklärung (noindex)
 ├─ assets/
-│  ├─ css/  base.css · home.css · board.css · album.css · pull-refresh.css
+│  ├─ css/  base.css · home.css · board.css · album.css · pull-refresh.css · legal.css
 │  ├─ js/   config.js · store.js · board.js · recommendations.js · album.js · pull-to-refresh.js
 │  ├─ img/  bg-*.jpg (page backgrounds) · p-*.jpg (portraits) · group.jpg · wg-art.svg
 │  └─ audio/ 01.mp3 … 10.mp3  (the album, ~45 MB total)
@@ -49,6 +51,7 @@ Every page loads `base.css` first, then exactly one page stylesheet.
 | `board.css` | `/filme/`, `/workshops/`, `/blog/` | Board headers, card treatment, movie list rows, image strip + lightbox, image picker, page backgrounds |
 | `album.css` | `/chebter-one/` | Vinyl, tracklist, player bar, fullscreen listen mode |
 | `pull-refresh.css` | all pages except `/chebter-one/` | The pull-to-refresh indicator, plus `overscroll-behavior-y: contain` on `html` so Chrome's own pull-to-refresh stays out of the way |
+| `legal.css` | `/impressum/`, `/datenschutz/` | Long-form reading column: narrow measure, small-caps headings, address blocks, the pink warning box |
 
 ## JS modules
 

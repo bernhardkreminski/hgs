@@ -67,9 +67,16 @@ needed to reach any subpage — the fixed `.site-nav` guarantees that).
 ```html
 <footer class="site-footer">
   <span>HGS — sieben Leute, ein Dach.</span>
+  <span class="footer-links">
+    <a href="/impressum/">Impressum</a> ·
+    <a href="/datenschutz/">Datenschutz</a>
+  </span>
   <span>Mit 🧡 selbst gebaut.</span>
 </footer>
 ```
+Die beiden Rechts-Links gehören auf **jede** Seite — sie müssen von überall
+erreichbar sein. Ausnahme: `/chebter-one/` hat gar keinen Footer (Vollbild-Player);
+die Seite ist nur von `/wg/` aus verlinkt und `noindex`.
 
 ## Photos (in `/assets/img/`)
 - `group.png` — group photo on the rooftop at sunset (landing hero, full-bleed via `.panel-media` + `.panel-scrim`)

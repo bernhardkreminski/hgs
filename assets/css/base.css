@@ -236,6 +236,9 @@ textarea.input { resize: vertical; min-height: 96px; }
   color: var(--ink-soft);
   font-size: 0.82rem; letter-spacing: 0.02em;
 }
+/* Impressum/Datenschutz — auf jeder Seite erreichbar, aber leise */
+.footer-links a { color: var(--ink-soft); }
+.footer-links a:hover { color: var(--ink); opacity: 1; }
 
 /* ---------- Utilities ---------- */
 .center { text-align: center; }

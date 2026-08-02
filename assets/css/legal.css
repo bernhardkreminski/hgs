@@ -1,0 +1,75 @@
+/* Rechtstexte (/impressum/, /datenschutz/) — lange Fließtexte statt Kacheln.
+ * Nur Typografie und Abstände; Farben kommen unverändert aus base.css. */
+
+.legal {
+  padding-top: calc(var(--nav-h) + 2.6rem);
+  padding-bottom: 3.5rem;
+}
+.legal .container { max-width: 46rem; }
+.legal .section-title { margin-bottom: 1.6rem; }
+
+.legal-lead {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  line-height: 1.65;
+  margin-bottom: 2.4rem;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent);
+}
+
+.legal section { margin-bottom: 2.2rem; }
+.legal h2 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.7rem;
+}
+.legal p {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.legal p + p { margin-top: 0.8rem; }
+.legal strong { color: var(--ink); font-weight: 600; }
+.legal a { color: var(--accent); }
+.legal a:hover { text-decoration: underline; }
+
+.legal ul {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  margin: 0.8rem 0 0 1.1rem;
+}
+.legal li + li { margin-top: 0.4rem; }
+
+.legal code {
+  font-size: 0.86em;
+  color: var(--ink);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.05em 0.4em;
+}
+
+/* Anschriften stehen für sich — größer, heller, ohne Fließtext-Rhythmus */
+.legal-address {
+  color: var(--ink) !important;
+  line-height: 1.75;
+}
+
+/* Der eine Absatz, den man wirklich lesen sollte */
+.legal-warn {
+  border: 1px solid rgba(200, 107, 152, 0.45);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  margin-top: 1rem;
+}
+
+.legal-meta {
+  margin-top: 3rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.85rem;
+}
