@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updatedAt": "2026-08-02T19:24:22.055Z",
-  "lastMailedOn": "",
+  "updatedAt": "2026-08-07T08:15:36.501Z",
+  "lastMailedOn": "2026-08-07",
   "boards": {
     "movies": {
       "e-ms1w11fv-ubi6dj": {
@@ -76,6 +76,15 @@
           "Spannend",
           "Action"
         ],
+        "watched": false,
+        "watchedAt": ""
+      },
+      "e-mshutc80-8gyspu": {
+        "title": "Wet Woman in the Wild",
+        "createdAt": "2026-08-06T18:33:17.856Z",
+        "description": "",
+        "url": "https://www.justwatch.com/us/movie/wet-woman-in-the-wind",
+        "tags": [],
         "watched": false,
         "watchedAt": ""
       }
