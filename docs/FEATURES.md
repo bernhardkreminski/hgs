@@ -150,6 +150,38 @@ plain "Naja" tag), and **images**.
 Bilder hinter der Website" uses that to showcase all five background photos with
 descriptions, without duplicating the files.
 
+### Sharing a single moment
+
+Every blog card carries a 🔗 button in its action pill (left of ✏️ / 🗑) and its
+entry `id` as the DOM `id`, which makes each moment linkable at
+`https://hgs.house/blog/#<entry-id>`.
+
+- **Phone:** `navigator.share()` opens the **OS share sheet** — WhatsApp, Signal,
+  Mail, AirDrop, whatever is installed. It must be called straight out of the
+  click handler (iOS discards the user gesture if you `await` first) — see
+  `shareEntry` in `board.js`
+- **Desktop:** no `navigator.share` in most browsers, so the link goes to the
+  clipboard and a toast says "Link kopiert."
+- **Neither works** (page served over plain `http`, old browser): a small modal
+  shows the link, preselected for copying
+- Cancelling the share sheet rejects with `AbortError` — that's a no-op, not a
+  fallback to copying
+- Opening such a link scrolls to the entry and pulses its ring for ~2.5 s
+  (`.entry-card.is-linked`). The cards only exist after the fetch, so the
+  browser's own anchor jump has long given up — `focusHashEntry()` does it after
+  `renderGrid()`, and again on `hashchange`. `scroll-margin-top` keeps the card
+  out from under the fixed nav
+- A link to a deleted entry says "Diesen Eintrag gibt es nicht mehr."
+
+Turned on per board via `shareable: true` in `CONFIGS` — today only the blog has
+it. `shareText` is the half-sentence after the title in the shared message.
+
+**The link preview is the same for every moment.** The `#…` part never reaches a
+server, so WhatsApp only ever sees `/blog/` and its Open Graph tags (in
+`blog/index.html`, image `bg-blog.jpg`). Per-moment previews would need
+server-rendered pages per entry — impossible on a static host without a build
+step, and both are things this site deliberately does not have.
+
 ---
 
 ## 6. Access-code gate (all three boards)

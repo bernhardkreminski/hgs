@@ -139,6 +139,21 @@
 /* Blog entry body: multiple paragraphs, calm spacing */
 .entry-body p + p { margin-top: 0.7rem; }
 
+/* Geteilter Eintrag (/blog/#<id>): nicht unter die fixe Nav springen und
+ * kurz aufleuchten, damit klar ist, welcher Eintrag gemeint war */
+.entry-card { scroll-margin-top: calc(var(--nav-h) + 1.2rem); }
+.entry-card.is-linked { animation: entry-linked 2.6s ease; }
+@keyframes entry-linked {
+  0%, 65% { box-shadow: 0 0 0 2px rgba(255, 158, 77, 0.7), 0 8px 32px rgba(0, 0, 0, 0.35); }
+  100% { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-card.is-linked {
+    animation: none;
+    box-shadow: 0 0 0 2px rgba(255, 158, 77, 0.7), 0 8px 32px rgba(0, 0, 0, 0.35);
+  }
+}
+
 .date-meta {
   display: block;
   margin-top: 1.1rem;

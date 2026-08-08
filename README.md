@@ -10,7 +10,7 @@ The website of our shared flat — live at **[hgs.house](https://hgs.house/)**.
 | WG | `/wg/` | Who lives here — portraits & bios |
 | Filme | `/filme/` | Shared watchlist, taggable by mood and filterable |
 | Workshops | `/workshops/` | Who teaches whom what |
-| Blog | `/blog/` | Great (and not so great) moments, with photos |
+| Blog | `/blog/` | Great (and not so great) moments, with photos — each one shareable |
 | Album | `/chebter-one/` | Hidden player for our own album — find it on the WG page |
 | Impressum | `/impressum/` | Legally required details, linked in every footer |
 | Datenschutz | `/datenschutz/` | What data the site touches, and what it doesn't |
@@ -29,6 +29,13 @@ restore it anytime.
 Switch storage backend: `assets/js/config.js` → `backend: "github" | "local"`.
 
 On a phone, **pull down** at the top of a page to fetch the latest entries.
+
+## Sharing a moment
+
+The 🔗 on a blog card shares that single entry — on a phone through the **OS
+share sheet** (WhatsApp, Signal, Mail …), on the desktop by copying the link.
+Every moment has its own address: `hgs.house/blog/#<id>`. Opening one scrolls
+straight to it.
 
 ## Daily digest
 

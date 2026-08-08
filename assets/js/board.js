@@ -245,6 +245,84 @@
     card.appendChild(strip);
   }
 
+  /* ---------- Teilen ----------
+   * Jeder Eintrag ist über /blog/#<id> direkt verlinkbar — die Karte trägt ihre
+   * id im DOM. Auf dem Handy öffnet navigator.share das System-Menü (WhatsApp,
+   * Signal, Mail …); wo es das nicht gibt (die meisten Desktop-Browser), landet
+   * der Link in der Zwischenablage. */
+  function entryUrl(entry) {
+    /* saubere URL: /blog/, nie /blog/index.html */
+    const path = location.pathname.replace(/index\.html$/, "");
+    return location.origin + path + "#" + entry.id;
+  }
+
+  /* Letzter Ausweg, wenn weder Teilen noch Zwischenablage gehen (http, alter Browser):
+   * den Link zum Markieren und Kopieren zeigen. */
+  function openLinkModal(url) {
+    const backdrop = el("div", { class: "modal-backdrop" });
+    const card = el("div", {
+      class: "modal-card",
+      role: "dialog",
+      "aria-modal": "true",
+      "aria-labelledby": "share-modal-title",
+    });
+    const h3 = el("h3", { id: "share-modal-title" }, "Link teilen");
+    const field = el("div", { class: "field" });
+    const label = el("label", { for: "share-link-input" }, "Link zu diesem Eintrag");
+    const input = el("input", { class: "input", id: "share-link-input", type: "text", readonly: true });
+    input.value = url;
+    field.append(label, input);
+    const actions = el("div", { class: "modal-actions" });
+    const closeBtn = el("button", { type: "button", class: "btn btn-ghost" }, "Schließen");
+    closeBtn.addEventListener("click", () => dismissTop(backdrop));
+    actions.appendChild(closeBtn);
+    card.append(h3, field, actions);
+    backdrop.appendChild(card);
+    pushModal(backdrop);
+    requestAnimationFrame(() => input.select());
+  }
+
+  /* Wichtig: navigator.share muss direkt im Klick laufen (iOS verlangt die
+   * Nutzergeste), deshalb vor dem Aufruf nichts awaiten. */
+  async function shareEntry(entry) {
+    const url = entryUrl(entry);
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: entry.title + " · HGS",
+          text: "„" + entry.title + "“ — " + config.shareText,
+          url: url,
+        });
+        return;
+      } catch (err) {
+        /* Abbrechen im System-Menü ist kein Fehler, sonst unten weiter mit Kopieren */
+        if (err && (err.name === "AbortError" || err.name === "NotAllowedError")) return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast("Link kopiert.");
+    } catch (_) {
+      openLinkModal(url);
+    }
+  }
+
+  /* Seite mit /blog/#<id> geöffnet (oder ein Link auf derselben Seite geklickt):
+   * den Eintrag anspringen und kurz hervorheben. */
+  function focusHashEntry() {
+    const id = decodeURIComponent(String(location.hash || "").slice(1));
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) {
+      if (entries.length) showToast("Diesen Eintrag gibt es nicht mehr.", true);
+      return;
+    }
+    const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" });
+    target.classList.add("is-linked");
+    setTimeout(() => target.classList.remove("is-linked"), 2600);
+  }
+
   /* ---------- card tag renderers (small badge next to the title) ---------- */
   function renderBlogTag(entry) {
     return entry.mood === "top"
@@ -377,6 +455,8 @@
         },
       ],
       sort: sortByCreatedDesc,
+      shareable: true,
+      shareText: "ein Moment aus der HGS.",
       renderTag: renderBlogTag,
       renderBody: renderBlogBody,
       renderMeta: renderBlogMeta,
@@ -1095,7 +1175,8 @@
   /* ---------- rendering ---------- */
   function createCard(entry) {
     if (config.watchable) return createRow(entry);
-    const card = el("div", { class: "card" });
+    /* Teilbare Einträge tragen ihre id als Anker — /blog/#<id> springt hierher */
+    const card = el("div", config.shareable ? { class: "card entry-card", id: entry.id } : { class: "card" });
     const head = el("div", { class: "card-head" });
     const titleWrap = el("div", { class: "card-title-wrap" });
     if (config.renderTag) {
@@ -1104,6 +1185,11 @@
     }
     titleWrap.appendChild(el("h3", {}, entry.title));
     const actions = el("div", { class: "card-actions" });
+    if (config.shareable) {
+      const shareBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Teilen" }, "🔗");
+      shareBtn.addEventListener("click", () => shareEntry(entry));
+      actions.appendChild(shareBtn);
+    }
     const editBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Bearbeiten" }, "✏️");
     const deleteBtn = el("button", { type: "button", class: "icon-btn", "aria-label": "Löschen" }, "🗑");
     actions.append(editBtn, deleteBtn);
@@ -1221,6 +1307,13 @@
       showToast("Laden fehlgeschlagen…", true);
     }
     renderGrid();
+
+    /* Die Karten stehen erst jetzt im DOM — der Browser hat den Anker aus der
+     * URL längst aufgegeben, also selbst hinspringen. */
+    if (config.shareable) {
+      focusHashEntry();
+      window.addEventListener("hashchange", focusHashEntry);
+    }
 
     if (addBtn) {
       addBtn.addEventListener("click", async () => {
